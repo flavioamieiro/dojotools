@@ -39,6 +39,10 @@ def monitor(dir='.', callable=git_commit_all, patterns=['.swp']):
 
         m_time_list = []
         for root, dirs, files in os.walk(dir):
+            # I have to ignore all the files in .git dir because any commit changes them
+            # considering them would cause an infinite loop
+            if '.git' in root:
+                continue
             files = filter_files(files, patterns)
             m_time_list += [os.stat(os.path.join(root, file)).st_mtime for file in files]
 
