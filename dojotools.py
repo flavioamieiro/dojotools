@@ -1,8 +1,21 @@
 import os
+import subprocess
 from time import sleep, ctime
 
 def p():
     print 'modificado'
+
+def git_commit_all():
+    """
+    Adds all files and commits them
+    """
+    msg = ctime()
+    p = subprocess.Popen("git add .; git commit -m '%s'" % msg, shell=True)
+
+    #if git returns 128 it means 'command not found' or 'not a git repo'
+    if p.wait() == 128:
+        raise OSError('Impossible to commit to repository. Make sure git is installed an this is a valid repository')
+
 
 def filter_files(files, patterns):
     """
@@ -16,7 +29,7 @@ def filter_files(files, patterns):
     return files
 
 
-def monitor(dir='.', callable=p, patterns=['.git', '.swp']):
+def monitor(dir='.', callable=git_commit_all, patterns=['.swp']):
     """
     Monitor a directory for changes, ignoring files matching any item in patterns and calls
     any callable when a file was changed.
