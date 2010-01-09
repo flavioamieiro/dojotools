@@ -52,7 +52,7 @@ def filter_files(files, patterns):
     return files
 
 
-def monitor(dir='.', callable=git_commit_all, patterns=['.swp']):
+def monitor(dir, callable, patterns):
     """
     Monitor a directory for changes, ignoring files matching any item in patterns and calls
     any callable when a file was changed.
@@ -77,9 +77,14 @@ def monitor(dir='.', callable=git_commit_all, patterns=['.swp']):
         sleep(1)
 
 if __name__ == '__main__':
+    dir = os.path.abspath(os.path.curdir)
+    patterns = ['.swp']
+
     try:
-        print 'Monitoring files'
+        print 'Monitoring files in %s' % dir
         print 'press ^C to quit'
-        monitor()
+
+        monitor(dir, git_commit_all, patterns)
+
     except KeyboardInterrupt:
         print '\nleaving...'
