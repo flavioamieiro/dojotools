@@ -25,19 +25,22 @@ import os
 import subprocess
 from time import sleep, ctime
 
-def p():
-    print 'modificado'
-
-def git_commit_all(dir):
+def git_commit_all(directory):
     """
     Adds all files and commits them
     """
     msg = ctime()
-    p = subprocess.Popen("git add .; git commit -m '%s'" % msg, shell=True, cwd=dir)
+    process = subprocess.Popen(
+        "git add .; git commit -m '%s'" % msg,
+        shell=True,
+        cwd=directory,
+    )
 
     #if git returns 128 it means 'command not found' or 'not a git repo'
-    if p.wait() == 128:
-        raise OSError('Impossible to commit to repository. Make sure git is installed an this is a valid repository')
+    if process.wait() == 128:
+        error = 'Impossible to commit to repository. ' + \
+                'Make sure git is installed an this is a valid repository'
+        raise OSError(error)
 
 
 def filter_files(files, patterns):
@@ -52,39 +55,42 @@ def filter_files(files, patterns):
     return files
 
 
-def monitor(dir, callable, patterns):
+def monitor(directory, func, patterns):
     """
     Monitor a directory for changes, ignoring files matching any item in patterns and calls
-    any callable when a file was changed.
+    any func when a file was changed.
     """
     old_sum = 0
     while True:
 
         m_time_list = []
-        for root, dirs, files in os.walk(dir):
-            # I have to ignore all the files in .git dir because any commit changes them
-            # considering them would cause an infinite loop
+        for root, dirs, files in os.walk(directory):
+            # I have to ignore all the files in .git dir because
+            # any commit changes them considering them would cause
+            # an infinite loop
             if '.git' in root:
                 continue
             files = filter_files(files, patterns)
-            m_time_list += [os.stat(os.path.join(root, file)).st_mtime for file in files]
+            m_time_list += [
+                os.stat(os.path.join(root, f)).st_mtime for f in files
+            ]
 
         new_sum = sum(m_time_list)
         if new_sum != old_sum:
-            callable(dir)
+            func(directory)
             old_sum = new_sum
 
         sleep(1)
 
 if __name__ == '__main__':
-    dir = os.path.abspath(os.path.curdir)
+    directory = os.path.abspath(os.path.curdir)
     patterns = ['.swp']
 
     try:
-        print 'Monitoring files in %s' % dir
+        print 'Monitoring files in %s' % directory
         print 'press ^C to quit'
 
-        monitor(dir, git_commit_all, patterns)
+        monitor(directory, git_commit_all, patterns)
 
     except KeyboardInterrupt:
         print '\nleaving...'
