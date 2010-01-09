@@ -23,6 +23,7 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 
 import os
 import subprocess
+from optparse import OptionParser
 from time import sleep, ctime
 
 def git_commit_all(directory):
@@ -83,14 +84,38 @@ def monitor(directory, func, patterns):
         sleep(1)
 
 if __name__ == '__main__':
-    directory = os.path.abspath(os.path.curdir)
-    patterns = ['.swp']
+    parser = OptionParser()
+    parser.add_option(
+        '-d',
+        '--directory',
+        action = 'store',
+        type = 'string',
+        dest = 'directory',
+        help = 'Watch DIRECTORY',
+        metavar = 'DIRECTORY',
+        default = os.path.abspath(os.path.curdir)
+    )
+    parser.add_option(
+        '-p',
+        '--pattern',
+        action = 'append',
+        type = 'string',
+        dest = 'patterns',
+        help = 'Ignore PATTERN. \
+You may define this as many times as you want \
+like in -p .txt -p .swp',
+        metavar = 'PATTERN',
+        default = [],
+    )
+    options, args = parser.parse_args()
 
     try:
-        print 'Monitoring files in %s' % directory
+        print 'Monitoring files in %s' % options.directory
+        if options.patterns:
+            print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        monitor(directory, git_commit_all, patterns)
+        monitor(options.directory, git_commit_all, options.patterns)
 
     except KeyboardInterrupt:
         print '\nleaving...'
