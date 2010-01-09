@@ -28,12 +28,12 @@ from time import sleep, ctime
 def p():
     print 'modificado'
 
-def git_commit_all():
+def git_commit_all(dir):
     """
     Adds all files and commits them
     """
     msg = ctime()
-    p = subprocess.Popen("git add .; git commit -m '%s'" % msg, shell=True)
+    p = subprocess.Popen("git add .; git commit -m '%s'" % msg, shell=True, cwd=dir)
 
     #if git returns 128 it means 'command not found' or 'not a git repo'
     if p.wait() == 128:
@@ -71,7 +71,7 @@ def monitor(dir='.', callable=git_commit_all, patterns=['.swp']):
 
         new_sum = sum(m_time_list)
         if new_sum != old_sum:
-            callable()
+            callable(dir)
             old_sum = new_sum
 
         sleep(1)
