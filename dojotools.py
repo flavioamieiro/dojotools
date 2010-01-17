@@ -114,7 +114,13 @@ def monitor(directory, functions, patterns):
 
 def parse_options():
     usage = "%prog [OPTIONS] COMMAND ..."
-    parser = OptionParser(usage)
+    description = """
+        %prog watches a directory for changes. As soon as there are any changes
+        to the files being watched, it runs the commands specified as positional
+        arguments. You can specify as many commands as you wish, but don't forget
+        to use quotes if you command has spaces in it.
+    """.replace('  ', '')
+    parser = OptionParser(usage, description=description)
     parser.add_option(
         '-d',
         '--directory',
