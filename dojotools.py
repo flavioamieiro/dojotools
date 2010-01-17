@@ -127,19 +127,6 @@ def parse_options():
     )
 
     parser.add_option(
-        '-c',
-        '--command',
-        action = 'append',
-        type = 'string',
-        dest = 'commands',
-        help = ' '.join(['Runs COMMAND when there is a change.',
-               'You may define this as many times as you want',
-               'E.g: -c "clear" -c "python test.py"']),
-        metavar = 'COMMAND',
-        default = [],
-    )
-
-    parser.add_option(
         '-p',
         '--pattern',
         action = 'append',
@@ -169,7 +156,7 @@ if __name__ == '__main__':
             (git_commit_all, options.directory),
         ]
 
-        for command in options.commands:
+        for command in args:
             functions.append((run_command, options.directory, command))
 
         monitor(options.directory, functions, options.patterns)
