@@ -113,7 +113,8 @@ def monitor(directory, functions, patterns):
 
 
 def parse_options():
-    parser = OptionParser()
+    usage = "%prog [OPTIONS] COMMAND ..."
+    parser = OptionParser(usage)
     parser.add_option(
         '-d',
         '--directory',
