@@ -133,14 +133,27 @@ def parse_options():
     )
 
     parser.add_option(
+        '-c',
+        '--commit',
+        action='store_true',
+        dest = 'commit',
+        help = ' '.join([
+            'if this flag is used, a git commit will',
+            'be issued whenever the files change'
+        ]),
+    )
+
+    parser.add_option(
         '-p',
         '--pattern',
         action = 'append',
         type = 'string',
         dest = 'patterns',
-        help = ' '.join(['Ignore PATTERN.',
-               'You may define this as many times as you want',
-               'like in -p .txt -p .swp']),
+        help = ' '.join([
+            'Ignore PATTERN.',
+            'You may define this as many times as you want',
+            'like in -p .txt -p .swp'
+            ]),
         metavar = 'PATTERN',
         default = [],
     )
@@ -158,9 +171,10 @@ if __name__ == '__main__':
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        functions = [
-            (git_commit_all, options.directory),
-        ]
+        functions = []
+
+        if options.commit:
+            functions.append((git_commit_all, options.directory))
 
         for command in args:
             functions.append((run_command, options.directory, command))
