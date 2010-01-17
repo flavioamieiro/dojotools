@@ -56,10 +56,23 @@ def filter_files(files, patterns):
     return files
 
 
-def monitor(directory, func, patterns):
+def monitor(directory, functions, patterns):
     """
     Monitor a directory for changes, ignoring files matching any item in patterns and calls
-    any func when a file was changed.
+    any func in functions when a file was changed.
+
+    functions must be a list of tuples, each of which contains
+    as their first item the function to be called. Whatever remains
+    will be passed as arguments. For example:
+
+    If your function list is this:
+
+        > functions = [(my_func, 1, 2, 3)]
+
+    then the result would be calling my_func with 1, 2 and 3 as args
+
+        > myfunc(1, 2, 3)
+
     """
     old_sum = 0
     while True:
@@ -78,7 +91,8 @@ def monitor(directory, func, patterns):
 
         new_sum = sum(m_time_list)
         if new_sum != old_sum:
-            func(directory)
+            for function in functions:
+                function[0](*function[1:])
             old_sum = new_sum
 
         sleep(1)
@@ -115,7 +129,11 @@ like in -p .txt -p .swp',
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        monitor(options.directory, git_commit_all, options.patterns)
+        functions = [
+            (git_commit_all, options.directory),
+        ]
+
+        monitor(options.directory, functions, options.patterns)
 
     except KeyboardInterrupt:
         print '\nleaving...'
