@@ -26,6 +26,20 @@ import subprocess
 from optparse import OptionParser
 from time import sleep, ctime
 
+
+def run_command(directory, test_cmd):
+    """
+    As the name says, runs a command and wait for it to finish
+    """
+    process = subprocess.Popen(
+        test_cmd,
+        shell=True,
+        cwd=directory,
+    )
+
+    process.wait()
+
+
 def git_commit_all(directory):
     """
     Adds all files and commits them
