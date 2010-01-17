@@ -111,7 +111,8 @@ def monitor(directory, functions, patterns):
 
         sleep(1)
 
-if __name__ == '__main__':
+
+def parse_options():
     parser = OptionParser()
     parser.add_option(
         '-d',
@@ -129,13 +130,19 @@ if __name__ == '__main__':
         action = 'append',
         type = 'string',
         dest = 'patterns',
-        help = 'Ignore PATTERN. \
-You may define this as many times as you want \
-like in -p .txt -p .swp',
+        help = ' '.join(['Ignore PATTERN.',
+               'You may define this as many times as you want',
+               'like in -p .txt -p .swp']),
         metavar = 'PATTERN',
         default = [],
     )
     options, args = parser.parse_args()
+    return options, args
+
+
+if __name__ == '__main__':
+
+    options, args = parse_options()
 
     try:
         print 'Monitoring files in %s' % options.directory
