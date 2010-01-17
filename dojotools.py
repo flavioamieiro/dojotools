@@ -23,6 +23,7 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 
 import os
 import subprocess
+import pynotify
 from optparse import OptionParser
 from time import sleep, ctime
 
@@ -33,11 +34,22 @@ def run_command(directory, test_cmd):
     """
     process = subprocess.Popen(
         test_cmd,
-        shell=True,
-        cwd=directory,
+        shell = True,
+        cwd = directory,
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE,
     )
 
-    process.wait()
+    output = process.stdout.read()
+    output += process.stderr.read()
+    status = process.wait()
+
+    pynotify.init('dojotools')
+    message = pynotify.Notification('Dojotools', output)
+
+    message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
+
+    message.show()
 
 
 def git_commit_all(directory):
