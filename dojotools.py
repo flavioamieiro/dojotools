@@ -172,8 +172,7 @@ def parse_options():
         metavar = 'PATTERN',
         default = [],
     )
-    options, args = parser.parse_args()
-    return options, args
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
