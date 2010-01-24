@@ -45,6 +45,8 @@ def run_command(directory, test_cmd):
     output += process.stderr.read()
     status = process.wait()
 
+    sys.stdout.write(output)
+
     pynotify.init('dojotools')
     message = pynotify.Notification('Dojotools', output)
 
