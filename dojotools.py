@@ -111,6 +111,9 @@ def monitor(directory, functions, patterns):
             if '.git' in root:
                 continue
             files = filter_files(files, patterns)
+            # Be careful. The += operator works as the extend method
+            # on mutable objects. For more information refer to
+            # http://zephyrfalcon.org/labs/python_pitfalls.html
             m_time_list += [
                 os.stat(os.path.join(root, f)).st_mtime for f in files
             ]
