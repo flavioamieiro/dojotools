@@ -22,6 +22,7 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 """
 
 import os
+import sys
 import subprocess
 import pynotify
 from optparse import OptionParser
@@ -197,3 +198,4 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         print '\nleaving...'
+        sys.exit(0)
