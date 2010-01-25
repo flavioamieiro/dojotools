@@ -28,7 +28,7 @@ from optparse import OptionParser
 from time import sleep, ctime
 
 try:
-    import pynotifya
+    import pynotify
 except ImportError:
     pynotify = None
     print
