@@ -24,9 +24,18 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 import os
 import sys
 import subprocess
-import pynotify
 from optparse import OptionParser
 from time import sleep, ctime
+
+try:
+    import pynotifya
+except ImportError:
+    pynotify = None
+    print
+    print
+    sys.stderr.write('*** Could not import pynotify. Make sure it is installed so you can see the notifications ***\n')
+    print
+    print
 
 
 def run_command(directory, test_cmd):
@@ -47,12 +56,13 @@ def run_command(directory, test_cmd):
 
     sys.stdout.write(output)
 
-    pynotify.init('dojotools')
-    message = pynotify.Notification('Dojotools', output)
+    if pynotify:
+        pynotify.init('dojotools')
+        message = pynotify.Notification('Dojotools', output)
 
-    message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
+        message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
 
-    message.show()
+        message.show()
 
 
 def git_commit_all(directory):
