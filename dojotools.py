@@ -40,31 +40,6 @@ except ImportError:
     print
 
 
-def run_command(directory, test_cmd):
-    """
-    As the name says, runs a command and wait for it to finish
-    """
-    process = subprocess.Popen(
-        test_cmd,
-        shell = True,
-        cwd = directory,
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE,
-    )
-
-    output = process.stdout.read()
-    output += process.stderr.read()
-    status = process.wait()
-
-    sys.stdout.write(output)
-
-    if pynotify:
-        pynotify.init('dojotools')
-        message = pynotify.Notification('Dojotools', output)
-
-        message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
-
-        message.show()
 
 
 def git_commit_all(directory):
@@ -121,6 +96,30 @@ class Monitor(object):
         self.directory = directory
         self.functions = functions
         self.patterns = patterns
+
+    def run_command(self, test_cmd):
+        """
+        As the name says, runs a command and wait for it to finish
+        """
+        process = subprocess.Popen(
+            test_cmd,
+            shell = True,
+            cwd = self.directory,
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE,
+        )
+
+        output = process.stdout.read()
+        output += process.stderr.read()
+        status = process.wait()
+
+        sys.stdout.write(output)
+
+        if pynotify:
+            pynotify.init('dojotools')
+            message = pynotify.Notification('Dojotools', output)
+            message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
+            message.show()
 
     def _filter_files(self, files):
         """
@@ -225,13 +224,13 @@ if __name__ == '__main__':
 
         functions = []
 
+        monitor = Monitor(options.directory, functions, options.patterns)
+
         if options.commit:
-            functions.append((git_commit_all, options.directory))
+            monitor.functions.append((git_commit_all, options.directory))
 
         for command in args:
-            functions.append((run_command, options.directory, command))
-
-        monitor = Monitor(options.directory, functions, options.patterns)
+            monitor.functions.append((monitor.run_command, command))
 
         status_icon = gtk.StatusIcon()
         status_icon.set_from_stock(gtk.STOCK_OK)
