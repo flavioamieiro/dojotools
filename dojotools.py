@@ -25,7 +25,7 @@ import os
 import sys
 import subprocess
 from optparse import OptionParser
-from time import sleep, ctime
+from time import ctime
 import gtk
 import gobject
 
