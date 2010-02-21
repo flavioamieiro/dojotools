@@ -33,11 +33,7 @@ try:
     import pynotify
 except ImportError:
     pynotify = None
-    print
-    print
-    sys.stderr.write('*** Could not import pynotify. Make sure it is installed so you can see the notifications ***\n')
-    print
-    print
+    sys.stderr.write('\n\n*** Could not import pynotify. Make sure it is installed so you can see the notifications ***\n\n\n')
 
 
 class Monitor(object):
