@@ -40,33 +40,15 @@ except ImportError:
     print
 
 
-
-
-def git_commit_all(directory):
-    """
-    Adds all files and commits them
-    """
-    msg = ctime()
-    process = subprocess.Popen(
-        "git add .; git commit -m '%s'" % msg,
-        shell=True,
-        cwd=directory,
-    )
-
-    #if git returns 128 it means 'command not found' or 'not a git repo'
-    if process.wait() == 128:
-        error = 'Impossible to commit to repository. ' + \
-                'Make sure git is installed an this is a valid repository'
-        raise OSError(error)
-
-
-
-
 class Monitor(object):
 
-    def __init__(self, directory, functions, patterns):
+    def __init__(self, directory, commands, patterns):
         """
         'directory' is the directory to be watched for changes.
+
+        --
+
+        'commands' is a list with the commands to run when a file changes
 
         --
 
@@ -76,25 +58,10 @@ class Monitor(object):
         Be careful, 'patterns' is NOT a regex, we only test if the string
         *contains* each of the so called patterns
 
-        --
-
-        'functions' must be a list of tuples, each of which contains
-        as their first item the function to be called by self.check when a
-        change is detected. Whatever remains will be passed as arguments.
-
-        For example:
-
-        If your function list is this:
-
-            > functions = [(my_func, 1, 2, 3)]
-
-        then the result would be calling my_func with 1, 2 and 3 as args
-
-            > myfunc(1, 2, 3)
         """
         self.old_sum = 0
         self.directory = directory
-        self.functions = functions
+        self.commands = commands
         self.patterns = patterns
 
     def run_command(self, test_cmd):
@@ -136,16 +103,11 @@ class Monitor(object):
     def check(self):
         """
         Monitor self.directory for changes, ignoring files matching any item
-        in self.patterns and calls any func in self.functions when a file was
+        in self.patterns and runs any command in self.commands when a file has
         changed.
         """
         m_time_list = []
         for root, dirs, files in os.walk(self.directory):
-            # I have to ignore all the files in .git dir because
-            # any commit changes them considering them would cause
-            # an infinite loop
-            if '.git' in root:
-                continue
             files = self._filter_files(files)
             # Be careful. The += operator works as the extend method
             # on mutable objects. For more information refer to
@@ -156,8 +118,8 @@ class Monitor(object):
 
         new_sum = sum(m_time_list)
         if new_sum != self.old_sum:
-            for function in self.functions:
-                function[0](*function[1:])
+            for command in self.commands:
+                self.run_command(command)
             self.old_sum = new_sum
 
         # This method must return True so gobject.timeout_add runs it again
@@ -182,17 +144,6 @@ def parse_options():
         help = 'Watch DIRECTORY',
         metavar = 'DIRECTORY',
         default = os.path.abspath(os.path.curdir)
-    )
-
-    parser.add_option(
-        '-c',
-        '--commit',
-        action='store_true',
-        dest = 'commit',
-        help = ' '.join([
-            'if this flag is used, a git commit will',
-            'be issued whenever the files change'
-        ]),
     )
 
     parser.add_option(
@@ -222,15 +173,7 @@ if __name__ == '__main__':
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        functions = []
-
-        monitor = Monitor(options.directory, functions, options.patterns)
-
-        if options.commit:
-            monitor.functions.append((git_commit_all, options.directory))
-
-        for command in args:
-            monitor.functions.append((monitor.run_command, command))
+        monitor = Monitor(options.directory, args, options.patterns)
 
         status_icon = gtk.StatusIcon()
         status_icon.set_from_stock(gtk.STOCK_OK)
