@@ -85,34 +85,29 @@ def git_commit_all(directory):
         raise OSError(error)
 
 
-def filter_files(files, patterns):
-    """
-    Filter a list of strings based on each item in 'patterns'
-
-    Be careful, 'patterns' is NOT a regex, we only test if the string
-    *contains* each of the so called patterns
-    """
-    for p in patterns:
-        files = [f for f in files if p not in f]
-    return files
 
 
 class Monitor(object):
 
     def __init__(self, directory, functions, patterns):
-        self.old_sum = 0
-        self.directory = directory
-        self.functions = functions
-        self.patterns = patterns
-
-    def check(self):
         """
-        Monitor a directory for changes, ignoring files matching any item in patterns and calls
-        any func in functions when a file was changed.
+        'directory' is the directory to be watched for changes.
 
-        functions must be a list of tuples, each of which contains
-        as their first item the function to be called. Whatever remains
-        will be passed as arguments. For example:
+        --
+
+        'patterns' is a list that will be used to filter the files we're
+        watching.
+
+        Be careful, 'patterns' is NOT a regex, we only test if the string
+        *contains* each of the so called patterns
+
+        --
+
+        'functions' must be a list of tuples, each of which contains
+        as their first item the function to be called by self.check when a
+        change is detected. Whatever remains will be passed as arguments.
+
+        For example:
 
         If your function list is this:
 
@@ -121,7 +116,29 @@ class Monitor(object):
         then the result would be calling my_func with 1, 2 and 3 as args
 
             > myfunc(1, 2, 3)
+        """
+        self.old_sum = 0
+        self.directory = directory
+        self.functions = functions
+        self.patterns = patterns
 
+    def _filter_files(self, files):
+        """
+        Filter a list of strings based on each item in 'self.patterns'
+
+        This function must be called every time `check` is called so we
+        will not ignore newly created files in the directory (that is why
+        files is not an instance attribute)
+        """
+        for p in self.patterns:
+            files = [f for f in files if p not in f]
+        return files
+
+    def check(self):
+        """
+        Monitor self.directory for changes, ignoring files matching any item
+        in self.patterns and calls any func in self.functions when a file was
+        changed.
         """
         m_time_list = []
         for root, dirs, files in os.walk(self.directory):
@@ -130,7 +147,7 @@ class Monitor(object):
             # an infinite loop
             if '.git' in root:
                 continue
-            files = filter_files(files, self.patterns)
+            files = self._filter_files(files)
             # Be careful. The += operator works as the extend method
             # on mutable objects. For more information refer to
             # http://zephyrfalcon.org/labs/python_pitfalls.html
