@@ -26,6 +26,8 @@ import sys
 import subprocess
 from optparse import OptionParser
 from time import sleep, ctime
+import gtk
+import gobject
 
 try:
     import pynotify
@@ -212,7 +214,15 @@ if __name__ == '__main__':
         for command in args:
             functions.append((run_command, options.directory, command))
 
-        monitor(options.directory, functions, options.patterns)
+        monitor = Monitor(options.directory, functions, options.patterns)
+
+        status_icon = gtk.StatusIcon()
+        status_icon.set_from_stock(gtk.STOCK_OK)
+        status_icon.set_visible(True)
+
+        gobject.timeout_add(1000, monitor.check)
+
+        gtk.main()
 
     except KeyboardInterrupt:
         print '\nleaving...'
