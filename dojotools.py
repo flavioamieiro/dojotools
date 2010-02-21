@@ -84,9 +84,12 @@ class Monitor(object):
 
         sys.stdout.write(output)
 
+        self.status_icon.set_from_stock(gtk.STOCK_OK if status == 0 else gtk.STOCK_CANCEL)
+
         if pynotify:
             pynotify.init('dojotools')
             message = pynotify.Notification('Dojotools', output)
+            message.attach_to_status_icon(self.status_icon)
             message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
             message.show()
 
