@@ -95,35 +95,40 @@ def filter_files(files, patterns):
     return files
 
 
-def monitor(directory, functions, patterns):
-    """
-    Monitor a directory for changes, ignoring files matching any item in patterns and calls
-    any func in functions when a file was changed.
+class Monitor(object):
 
-    functions must be a list of tuples, each of which contains
-    as their first item the function to be called. Whatever remains
-    will be passed as arguments. For example:
+    def __init__(self, directory, functions, patterns):
+        self.old_sum = 0
+        self.directory = directory
+        self.functions = functions
+        self.patterns = patterns
 
-    If your function list is this:
+    def check(self):
+        """
+        Monitor a directory for changes, ignoring files matching any item in patterns and calls
+        any func in functions when a file was changed.
 
-        > functions = [(my_func, 1, 2, 3)]
+        functions must be a list of tuples, each of which contains
+        as their first item the function to be called. Whatever remains
+        will be passed as arguments. For example:
 
-    then the result would be calling my_func with 1, 2 and 3 as args
+        If your function list is this:
 
-        > myfunc(1, 2, 3)
+            > functions = [(my_func, 1, 2, 3)]
 
-    """
-    old_sum = 0
-    while True:
+        then the result would be calling my_func with 1, 2 and 3 as args
 
+            > myfunc(1, 2, 3)
+
+        """
         m_time_list = []
-        for root, dirs, files in os.walk(directory):
+        for root, dirs, files in os.walk(self.directory):
             # I have to ignore all the files in .git dir because
             # any commit changes them considering them would cause
             # an infinite loop
             if '.git' in root:
                 continue
-            files = filter_files(files, patterns)
+            files = filter_files(files, self.patterns)
             # Be careful. The += operator works as the extend method
             # on mutable objects. For more information refer to
             # http://zephyrfalcon.org/labs/python_pitfalls.html
@@ -132,12 +137,13 @@ def monitor(directory, functions, patterns):
             ]
 
         new_sum = sum(m_time_list)
-        if new_sum != old_sum:
-            for function in functions:
+        if new_sum != self.old_sum:
+            for function in self.functions:
                 function[0](*function[1:])
-            old_sum = new_sum
+            self.old_sum = new_sum
 
-        sleep(1)
+        # This method must return True so gobject.timeout_add runs it again
+        return True
 
 
 def parse_options():
