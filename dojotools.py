@@ -64,6 +64,12 @@ class Monitor(object):
         self.commands = commands
         self.patterns = patterns
 
+        self.status_icon = gtk.StatusIcon()
+        self.status_icon.set_from_stock(gtk.STOCK_OK)
+        self.status_icon.set_visible(True)
+
+        gobject.timeout_add(1000, self.check)
+
     def run_command(self, test_cmd):
         """
         As the name says, runs a command and wait for it to finish
@@ -174,12 +180,6 @@ if __name__ == '__main__':
         print 'press ^C to quit'
 
         monitor = Monitor(options.directory, args, options.patterns)
-
-        status_icon = gtk.StatusIcon()
-        status_icon.set_from_stock(gtk.STOCK_OK)
-        status_icon.set_visible(True)
-
-        gobject.timeout_add(1000, monitor.check)
 
         gtk.main()
 
