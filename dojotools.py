@@ -64,6 +64,11 @@ class Monitor(object):
         self.commands = commands
         self.patterns = patterns
 
+        self._create_icon()
+
+        gobject.timeout_add(1000, self.check)
+
+    def _create_icon(self):
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_file(PASS_ICON)
 
@@ -76,7 +81,6 @@ class Monitor(object):
         self.status_icon.connect('popup-menu', self.show_menu, self.menu)
         self.status_icon.set_visible(True)
 
-        gobject.timeout_add(1000, self.check)
 
     def show_menu(self, widget, button, time, data):
         data.show_all()
