@@ -199,6 +199,16 @@ def parse_options():
         metavar = 'PATTERN',
         default = [],
     )
+
+    parser.add_option(
+        '-t',
+        '--time',
+        action = 'store',
+        type = 'int',
+        dest = 'round_time',
+        help = 'Define the time of each round',
+        default = 300
+    )
     return parser.parse_args()
 
 
@@ -212,7 +222,7 @@ if __name__ == '__main__':
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        monitor = Monitor(options.directory, args, options.patterns)
+        monitor = Monitor(options.directory, args, options.patterns, options.round_time)
 
         gtk.main()
 
