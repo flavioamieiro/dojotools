@@ -35,6 +35,10 @@ except ImportError:
     pynotify = None
     sys.stderr.write('\n\n*** Could not import pynotify. Make sure it is installed so you can see the notifications ***\n\n\n')
 
+IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'images/')
+PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
+FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
+
 
 class Monitor(object):
 
@@ -61,7 +65,7 @@ class Monitor(object):
         self.patterns = patterns
 
         self.status_icon = gtk.StatusIcon()
-        self.status_icon.set_from_stock(gtk.STOCK_OK)
+        self.status_icon.set_from_file(PASS_ICON)
 
         self.menu = gtk.Menu()
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
@@ -96,7 +100,7 @@ class Monitor(object):
 
         sys.stdout.write(output)
 
-        self.status_icon.set_from_stock(gtk.STOCK_OK if status == 0 else gtk.STOCK_CANCEL)
+        self.status_icon.set_from_file(PASS_ICON if status == 0 else FAIL_ICON)
 
         if pynotify:
             pynotify.init('dojotools')
