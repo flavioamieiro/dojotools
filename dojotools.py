@@ -42,7 +42,8 @@ FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 class Monitor(object):
 
-    def __init__(self, directory, commands, patterns):
+
+    def __init__(self, directory, commands, patterns, round_time=300):
         """
         'directory' is the directory to be watched for changes.
 
@@ -67,6 +68,10 @@ class Monitor(object):
         self._create_icon()
 
         gobject.timeout_add(1000, self.check)
+        gobject.timeout_add(1000, self.update_timer)
+
+        self.round_time = round_time
+        self.time_left = round_time
 
     def _create_icon(self):
         self.status_icon = gtk.StatusIcon()
@@ -84,6 +89,16 @@ class Monitor(object):
     def show_menu(self, widget, button, time, data):
         data.show_all()
         data.popup(None, None, None, button, time)
+
+    def update_timer(self):
+        if self.time_left:
+            self.time_left -= 1
+            time_str = '%02d:%02d' % ((self.time_left / 60), (self.time_left % 60))
+            self.status_icon.set_tooltip(time_str)
+        else:
+            self.time_left = self.DEFAULT_TIME
+
+        return True
 
     def _filter_files(self, files):
         """
