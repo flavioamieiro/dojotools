@@ -81,10 +81,21 @@ class Monitor(object):
         self.status_icon.connect('popup-menu', self.show_menu, self.menu)
         self.status_icon.set_visible(True)
 
-
     def show_menu(self, widget, button, time, data):
         data.show_all()
         data.popup(None, None, None, button, time)
+
+    def _filter_files(self, files):
+        """
+        Filter a list of strings based on each item in 'self.patterns'
+
+        This function must be called every time `check` is called so we
+        will not ignore newly created files in the directory (that is why
+        files is not an instance attribute)
+        """
+        for p in self.patterns:
+            files = [f for f in files if p not in f]
+        return files
 
     def run_command(self, test_cmd):
         """
@@ -112,18 +123,6 @@ class Monitor(object):
             message.attach_to_status_icon(self.status_icon)
             message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
             message.show()
-
-    def _filter_files(self, files):
-        """
-        Filter a list of strings based on each item in 'self.patterns'
-
-        This function must be called every time `check` is called so we
-        will not ignore newly created files in the directory (that is why
-        files is not an instance attribute)
-        """
-        for p in self.patterns:
-            files = [f for f in files if p not in f]
-        return files
 
     def check(self):
         """
