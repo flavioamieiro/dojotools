@@ -62,9 +62,21 @@ class Monitor(object):
 
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_stock(gtk.STOCK_OK)
+
+        self.menu = gtk.Menu()
+        self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        self.quit_item.connect('activate', gtk.main_quit, gtk)
+
+        self.menu.append(self.quit_item)
+
+        self.status_icon.connect('popup-menu', self.show_menu, self.menu)
         self.status_icon.set_visible(True)
 
         gobject.timeout_add(1000, self.check)
+
+    def show_menu(self, widget, button, time, data):
+        data.show_all()
+        data.popup(None, None, None, button, time)
 
     def run_command(self, test_cmd):
         """
