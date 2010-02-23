@@ -35,7 +35,7 @@ except ImportError:
     pynotify = None
     sys.stderr.write('\n\n*** Could not import pynotify. Make sure it is installed so you can see the notifications ***\n\n\n')
 
-IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'images/')
+IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
 PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
