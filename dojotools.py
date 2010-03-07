@@ -100,6 +100,19 @@ class Monitor(object):
         dialog.run()
         dialog.destroy()
 
+    def _show_command_results(self, status, output):
+
+        sys.stdout.write(output)
+
+        self.status_icon.set_from_file(PASS_ICON if status == 0 else FAIL_ICON)
+
+        if pynotify:
+            pynotify.init('dojotools')
+            message = pynotify.Notification('Dojotools', output)
+            message.attach_to_status_icon(self.status_icon)
+            message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
+            message.show()
+
     def update_timer(self):
         if self.time_left:
             self.time_left -= 1
@@ -139,16 +152,8 @@ class Monitor(object):
         output += process.stderr.read()
         status = process.wait()
 
-        sys.stdout.write(output)
+        self._show_command_results(status, output)
 
-        self.status_icon.set_from_file(PASS_ICON if status == 0 else FAIL_ICON)
-
-        if pynotify:
-            pynotify.init('dojotools')
-            message = pynotify.Notification('Dojotools', output)
-            message.attach_to_status_icon(self.status_icon)
-            message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
-            message.show()
 
     def check(self):
         """
