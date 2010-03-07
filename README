@@ -1,1 +1,19 @@
-Placeholder
+Dojotools is intended to help in coding dojo sessions.
+
+
+Our *huge* feature list is:
+
+ - Watch a directory for changes and run a user supplied command
+   when a file changes
+
+ - Keep track of the round time (in the simplest way possible)
+
+
+The only dependency is pygtk (to create the status icon), but if
+you want notifications, you should also have pynotify installed.
+
+Notifications, however, will not work very well in Ubuntu, since
+Canonical’s Notify-OSD does not behave the same way as libnotify
+does in other linux distributions.
+
+We still need notifications for windows platforms.
