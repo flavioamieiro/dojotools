@@ -90,20 +90,23 @@ class Monitor(object):
         data.show_all()
         data.popup(None, None, None, button, time)
 
+    def _warn_time_is_up(self):
+        """Shows a dialog warning the pilot that his time is up"""
+        dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
+        dialog.set_default_size(180, 120)
+        dialog.set_keep_above(True)
+        dialog.vbox.pack_start(gtk.Label('Your time is up!'))
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+
     def update_timer(self):
         if self.time_left:
             self.time_left -= 1
             time_str = '%02d:%02d' % ((self.time_left / 60), (self.time_left % 60))
             self.status_icon.set_tooltip(time_str)
         else:
-            dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
-            dialog.set_default_size(180, 120)
-            dialog.set_keep_above(True)
-            dialog.vbox.pack_start(gtk.Label('Your time is up!'))
-            dialog.show_all()
-            dialog.run()
-            dialog.destroy()
-
+            self._warn_time_is_up()
             self.time_left = self.round_time
 
         return True
