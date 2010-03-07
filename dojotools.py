@@ -42,7 +42,6 @@ FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 class Monitor(object):
 
-
     def __init__(self, directory, commands, patterns, round_time=300):
         """
         'directory' is the directory to be watched for changes.
@@ -119,7 +118,7 @@ class Monitor(object):
 
         self.status_icon.set_from_file(PASS_ICON if status == 0 else FAIL_ICON)
 
-        if pynotify:
+        if pynotify is not None:
             pynotify.init('dojotools')
             message = pynotify.Notification('Dojotools', output)
             message.attach_to_status_icon(self.status_icon)
