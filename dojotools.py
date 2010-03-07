@@ -151,7 +151,7 @@ class Monitor(object):
 
     def run_command(self, test_cmd):
         """
-        As the name says, runs a command and wait for it to finish
+        As the name says, runs a command and waits for it to finish
         """
         process = subprocess.Popen(
             test_cmd,
