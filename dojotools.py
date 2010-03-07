@@ -40,37 +40,15 @@ PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 
-class Monitor(object):
+class UserInterface(object):
 
-    def __init__(self, directory, commands, patterns, round_time=300):
-        """
-        'directory' is the directory to be watched for changes.
-
-        --
-
-        'commands' is a list with the commands to run when a file changes
-
-        --
-
-        'patterns' is a list that will be used to filter the files we're
-        watching.
-
-        Be careful, 'patterns' is NOT a regex, we only test if the string
-        *contains* each of the so called patterns
-
-        """
-        self.old_sum = 0
-        self.directory = directory
-        self.commands = commands
-        self.patterns = patterns
-
+    def __init__(self, round_time=300):
         self._create_icon()
-
-        gobject.timeout_add(1000, self.check)
-        gobject.timeout_add(1000, self.update_timer)
 
         self.round_time = round_time
         self.time_left = round_time
+
+        gobject.timeout_add(1000, self.update_timer)
 
     def _create_icon(self):
         self.status_icon = gtk.StatusIcon()
@@ -136,6 +114,34 @@ class Monitor(object):
 
         return True
 
+
+class Monitor(object):
+
+    def __init__(self, ui, directory, commands, patterns):
+        """
+        'directory' is the directory to be watched for changes.
+
+        --
+
+        'commands' is a list with the commands to run when a file changes
+
+        --
+
+        'patterns' is a list that will be used to filter the files we're
+        watching.
+
+        Be careful, 'patterns' is NOT a regex, we only test if the string
+        *contains* each of the so called patterns
+
+        """
+        self.old_sum = 0
+        self.directory = directory
+        self.commands = commands
+        self.patterns = patterns
+        self.ui = ui
+
+        gobject.timeout_add(1000, self.check)
+
     def _filter_files(self, files):
         """
         Filter a list of strings based on each item in 'self.patterns'
@@ -164,8 +170,7 @@ class Monitor(object):
         output += process.stderr.read()
         status = process.wait()
 
-        self._show_command_results(status, output)
-
+        self.ui._show_command_results(status, output)
 
     def check(self):
         """
@@ -250,7 +255,8 @@ if __name__ == '__main__':
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        monitor = Monitor(options.directory, args, options.patterns, options.round_time)
+        ui = UserInterface(options.round_time)
+        monitor = Monitor(ui, options.directory, args, options.patterns)
 
         gtk.main()
 
