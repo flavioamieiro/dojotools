@@ -138,7 +138,10 @@ class UserInterface(object):
             pynotify.init('dojotools')
             message = pynotify.Notification('Dojotools', output)
             message.attach_to_status_icon(self.status_icon)
-            message.set_urgency(pynotify.URGENCY_NORMAL if status == 0 else pynotify.URGENCY_CRITICAL)
+            message.set_urgency(
+                pynotify.URGENCY_NORMAL if status == 0
+                else pynotify.URGENCY_CRITICAL
+            )
             message.show()
 
     def update_timer(self):
@@ -299,7 +302,9 @@ if __name__ == '__main__':
     try:
         print 'Monitoring files in %s' % options.directory
         if options.patterns:
-            print 'ignoring files with %s in their name' % ' '.join(options.patterns)
+            print 'ignoring files with %s in their name' % ' '.join(
+                options.patterns
+            )
         print 'press ^C to quit'
 
         timer = Timer(options.round_time)
