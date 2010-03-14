@@ -42,7 +42,7 @@ in [this Ubuntu forums post][1] by [gradinaruvasile][2]:
 >         notify-send test test
 
 
-We still need notifications for windows platforms.
+We still need notifications for other platforms.
 
 
 [1]: http://www.ubuntuforums.org/showthread.php?p=7658286#post7658286
