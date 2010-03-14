@@ -71,16 +71,18 @@ class UserInterface(object):
     def __init__(self, timer):
         self.timer = timer
 
-        self._create_icon()
+        self.status_icon = gtk.StatusIcon()
+        self.status_icon.set_from_file(PASS_ICON)
+        self._create_menu()
+        self.status_icon.set_visible(True)
+
         self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
 
-    def _create_icon(self):
-        self.status_icon = gtk.StatusIcon()
-        self.status_icon.set_from_file(PASS_ICON)
-
+    def _create_menu(self):
         self.menu = gtk.Menu()
+
         self.pause_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
         self.pause_item.connect('activate', self.pause_timer)
 
@@ -98,7 +100,6 @@ class UserInterface(object):
         self.menu.append(self.quit_item)
 
         self.status_icon.connect('popup-menu', self.show_menu, self.menu)
-        self.status_icon.set_visible(True)
 
     def show_menu(self, widget, button, time, data):
         data.show_all()
