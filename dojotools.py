@@ -23,6 +23,7 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 
 import os
 import sys
+import re
 import subprocess
 from optparse import OptionParser
 import gtk
@@ -67,12 +68,8 @@ class Monitor(object):
 
         --
 
-        'patterns' is a list that will be used to filter the files we're
-        watching.
-
-        Be careful, 'patterns' is NOT a regex, we only test if the string
-        *contains* each of the so called patterns
-
+        'patterns_files' is the path to a file which contains a list that will
+        be used to filter the files we're watching.
         """
         self.old_sum = 0
         self.directory = directory
@@ -83,6 +80,10 @@ class Monitor(object):
         gobject.timeout_add(1000, self.check)
 
     def _get_patterns(self, patterns_file):
+        """
+        Reads `patterns_file' and returns a list of compiled regexes with
+        every pattern found in the file + the file name.
+        """
         try:
             with open(patterns_file, 'r') as f:
                 patterns = [p.strip() for p in f.readlines()]
@@ -92,6 +93,11 @@ class Monitor(object):
                 % patterns_file
             )
             patterns = []
+
+        # Add patterns_file to the ignored patterns so it won't be tracked
+        patterns += [os.path.basename(patterns_file)]
+
+        patterns = [re.compile(p) for p in patterns]
 
         return patterns
 
@@ -104,7 +110,7 @@ class Monitor(object):
         files is not an instance attribute)
         """
         for p in self.patterns:
-            files = [f for f in files if p not in f]
+            files = [f for f in files if not p.match(f)]
         return files
 
     def run_command(self, test_cmd):
@@ -177,7 +183,11 @@ def parse_options():
         action = 'store',
         type = 'string',
         dest = 'patterns_file',
-        help = 'Defines the file with patterns to ignore',
+        help = (
+            'Defines the file with patterns to ignore. '
+            'Make sure the patterns in the file are valid '
+            'python regular expressions.'
+        ),
         metavar = 'PATTERNS_FILE',
         default = None,
     )
@@ -198,14 +208,14 @@ if __name__ == '__main__':
 
     options, args = parse_options()
 
+    if options.patterns_file == None:
+        options.patterns_file = os.path.join(
+            options.directory,
+            '.dojoignore'
+        )
+
     try:
         print 'Monitoring files in %s' % options.directory
-        if options.patterns_file == None:
-            options.patterns_file = os.path.join(
-                options.directory,
-                '.dojoignore'
-            )
-
         print 'ignoring files in %s' % (options.patterns_file)
         print 'press ^C to quit'
 
