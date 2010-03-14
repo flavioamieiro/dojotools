@@ -16,4 +16,33 @@ Notifications, however, will not work very well in Ubuntu, since
 Canonical’s Notify-OSD does not behave the same way as libnotify
 does in other linux distributions.
 
+You can revert to the old notification-daemon following instructions
+in [this Ubuntu forums post][2] by [gradinaruvasile][2]:
+
+> 1. Install the notification-daemon package:
+>
+>         sudo apt-get install notification-daemon
+>
+> 2. Rename the /usr/lib/notify-osd/notify-osd executable
+>
+>         sudo mv /usr/lib/notify-osd/notify-osd /usr/lib/notify-osd/notify-osd-original
+>
+> 3. Create a symbolic link:
+>
+>         sudo ln -s /usr/lib/notification-daemon/notification-daemon /usr/lib/notify-osd/notify-osd
+>
+> 4. Kill the original notification:
+>
+>         sudo killall notify-osd
+>
+> 5. Launch the new notification - press alt+F2, type /usr/lib/notify-osd/notify-osd
+>
+> 6. Test:
+>
+>         notify-send test test
+
+
 We still need notifications for windows platforms.
+
+[1]: http://www.ubuntuforums.org/showthread.php?p=7658286#post7658286
+[2]: http://www.ubuntuforums.org/member.php?u=589640
