@@ -148,7 +148,9 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
+            self.pause_timer()
             self._warn_time_is_up()
+            self.start_timer()
 
         return True
 
