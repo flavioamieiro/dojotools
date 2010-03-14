@@ -17,7 +17,7 @@ Canonical’s Notify-OSD does not behave the same way as libnotify
 does in other linux distributions.
 
 You can revert to the old notification-daemon following instructions
-in [this Ubuntu forums post][2] by [gradinaruvasile][2]:
+in [this Ubuntu forums post][1] by [gradinaruvasile][2]:
 
 > 1. Install the notification-daemon package:
 >
