@@ -57,7 +57,7 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns):
+    def __init__(self, ui, directory, commands, patterns_file):
         """
         'directory' is the directory to be watched for changes.
 
@@ -77,10 +77,23 @@ class Monitor(object):
         self.old_sum = 0
         self.directory = directory
         self.commands = commands
-        self.patterns = patterns
+        self.patterns = self._get_patterns(patterns_file)
         self.ui = ui
 
         gobject.timeout_add(1000, self.check)
+
+    def _get_patterns(self, patterns_file):
+        try:
+            with open(patterns_file, 'r') as f:
+                patterns = [p.strip() for p in f.readlines()]
+        except IOError:
+            sys.stdout.write(
+                'Could not find %s. Patterns will not be ignored\n'
+                % patterns_file
+            )
+            patterns = []
+
+        return patterns
 
     def _filter_files(self, files):
         """
@@ -160,17 +173,13 @@ def parse_options():
 
     parser.add_option(
         '-p',
-        '--pattern',
-        action = 'append',
+        '--patterns_file',
+        action = 'store',
         type = 'string',
-        dest = 'patterns',
-        help = ' '.join([
-            'Ignore PATTERN.',
-            'You may define this as many times as you want',
-            'like in -p .txt -p .swp'
-            ]),
-        metavar = 'PATTERN',
-        default = [],
+        dest = 'patterns_file',
+        help = 'Defines the file with patterns to ignore',
+        metavar = 'PATTERNS_FILE',
+        default = None,
     )
 
     parser.add_option(
@@ -191,15 +200,18 @@ if __name__ == '__main__':
 
     try:
         print 'Monitoring files in %s' % options.directory
-        if options.patterns:
-            print 'ignoring files with %s in their name' % ' '.join(
-                options.patterns
+        if options.patterns_file == None:
+            options.patterns_file = os.path.join(
+                options.directory,
+                '.dojoignore'
             )
+
+        print 'ignoring files in %s' % (options.patterns_file)
         print 'press ^C to quit'
 
         timer = Timer(options.round_time)
         ui = UserInterface(timer)
-        monitor = Monitor(ui, options.directory, args, options.patterns)
+        monitor = Monitor(ui, options.directory, args, options.patterns_file)
 
         gtk.main()
 
