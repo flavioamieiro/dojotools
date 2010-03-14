@@ -132,7 +132,10 @@ class UserInterface(object):
 
         sys.stdout.write(output)
 
-        self.status_icon.set_from_file(PASS_ICON if status == 0 else FAIL_ICON)
+        if self.timer.running:
+            self.status_icon.set_from_file(
+                PASS_ICON if status == 0 else FAIL_ICON
+            )
 
         if pynotify is not None:
             pynotify.init('dojotools')
@@ -159,9 +162,11 @@ class UserInterface(object):
         return True
 
     def pause_timer(self, widget=None):
+        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
         self.timer.pause()
 
     def start_timer(self, widget=None):
+        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PLAY)
         self.timer.start()
 
 
