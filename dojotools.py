@@ -111,7 +111,7 @@ class Monitor(object):
         output += process.stderr.read()
         status = process.wait()
 
-        self.ui._show_command_results(status, output)
+        self.ui.show_command_results(status, output)
 
     def check(self):
         """

@@ -53,7 +53,7 @@ class UserInterface(object):
 
         self.status_icon.connect('popup-menu', self.show_menu, self.menu)
 
-    def show_menu(self, widget, button, time, data):
+    def _show_menu(self, widget, button, time, data):
         data.show_all()
         data.popup(None, None, None, button, time)
 
@@ -62,7 +62,15 @@ class UserInterface(object):
             PASS_ICON if self.current_status == 0 else FAIL_ICON
         )
 
-    def _warn_time_is_up(self):
+    def pause_timer(self, widget=None):
+        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
+        self.timer.pause()
+
+    def start_timer(self, widget=None):
+        self._set_icon()
+        self.timer.start()
+
+    def warn_time_is_up(self):
         """Shows a dialog warning the pilot that his time is up"""
         dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
         dialog.set_default_size(180, 120)
@@ -72,7 +80,7 @@ class UserInterface(object):
         dialog.run()
         dialog.destroy()
 
-    def _show_command_results(self, status, output):
+    def show_command_results(self, status, output):
         """
         Shows the output to the users.
 
@@ -113,15 +121,7 @@ class UserInterface(object):
             self.status_icon.set_tooltip(time_str)
         else:
             self.pause_timer()
-            self._warn_time_is_up()
+            self.warn_time_is_up()
             self.start_timer()
 
         return True
-
-    def pause_timer(self, widget=None):
-        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
-        self.timer.pause()
-
-    def start_timer(self, widget=None):
-        self._set_icon()
-        self.timer.start()
