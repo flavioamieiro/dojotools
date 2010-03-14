@@ -41,13 +41,38 @@ PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 
-class UserInterface(object):
+class Timer(object):
 
     def __init__(self, round_time=300):
-        self._create_icon()
-
         self.round_time = round_time
-        self.time_left = round_time
+        self.time_left = self.round_time
+
+        gobject.timeout_add(1000, self.update)
+        self.running = False
+
+    def start(self):
+        self.running = True
+
+    def pause(self):
+        self.running = False
+
+    def update(self):
+        if self.running:
+            if self.time_left:
+                self.time_left -= 1
+            else:
+                self.time_left = self.round_time
+
+        return True
+
+
+class UserInterface(object):
+
+    def __init__(self, timer):
+        self.timer = timer
+
+        self._create_icon()
+        self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
 
@@ -56,9 +81,20 @@ class UserInterface(object):
         self.status_icon.set_from_file(PASS_ICON)
 
         self.menu = gtk.Menu()
+        self.pause_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
+        self.pause_item.connect('activate', self.pause_timer)
+
+        self.play_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PLAY)
+        self.play_item.connect('activate', self.start_timer)
+
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit_item.connect('activate', gtk.main_quit, gtk)
 
+        self.separator = gtk.MenuItem()
+
+        self.menu.append(self.pause_item)
+        self.menu.append(self.play_item)
+        self.menu.append(self.separator)
         self.menu.append(self.quit_item)
 
         self.status_icon.connect('popup-menu', self.show_menu, self.menu)
@@ -105,15 +141,22 @@ class UserInterface(object):
             message.show()
 
     def update_timer(self):
-        if self.time_left:
-            self.time_left -= 1
-            time_str = '%02d:%02d' % ((self.time_left / 60), (self.time_left % 60))
+        if self.timer.time_left:
+            time_str = '%02d:%02d' % (
+                (self.timer.time_left / 60),
+                (self.timer.time_left % 60)
+            )
             self.status_icon.set_tooltip(time_str)
         else:
             self._warn_time_is_up()
-            self.time_left = self.round_time
 
         return True
+
+    def pause_timer(self, widget=None):
+        self.timer.pause()
+
+    def start_timer(self, widget=None):
+        self.timer.start()
 
 
 class Monitor(object):
@@ -256,7 +299,8 @@ if __name__ == '__main__':
             print 'ignoring files with %s in their name' % ' '.join(options.patterns)
         print 'press ^C to quit'
 
-        ui = UserInterface(options.round_time)
+        timer = Timer(options.round_time)
+        ui = UserInterface(timer)
         monitor = Monitor(ui, options.directory, args, options.patterns)
 
         gtk.main()
