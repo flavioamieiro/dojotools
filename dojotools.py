@@ -86,7 +86,10 @@ class Monitor(object):
         """
         try:
             with open(patterns_file, 'r') as f:
-                patterns = [p.strip() for p in f.readlines()]
+                patterns = [
+                    p.strip().replace('*.', '.*\.')
+                    for p in f.readlines()
+                ]
         except IOError:
             sys.stdout.write(
                 'Could not find %s. Patterns will not be ignored\n'
@@ -186,7 +189,8 @@ def parse_options():
         help = (
             'Defines the file with patterns to ignore. '
             'Make sure the patterns in the file are valid '
-            'python regular expressions.'
+            'python regular expressions. '
+            'Patterns like *.ext are also accepted.'
         ),
         metavar = 'PATTERNS_FILE',
         default = None,
