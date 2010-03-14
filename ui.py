@@ -51,7 +51,7 @@ class UserInterface(object):
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
 
-        self.status_icon.connect('popup-menu', self.show_menu, self.menu)
+        self.status_icon.connect('popup-menu', self._show_menu, self.menu)
 
     def _show_menu(self, widget, button, time, data):
         data.show_all()
