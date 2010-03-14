@@ -57,6 +57,11 @@ class UserInterface(object):
         data.show_all()
         data.popup(None, None, None, button, time)
 
+    def _set_icon(self):
+        self.status_icon.set_from_file(
+            PASS_ICON if self.current_status == 0 else FAIL_ICON
+        )
+
     def _warn_time_is_up(self):
         """Shows a dialog warning the pilot that his time is up"""
         dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
@@ -87,9 +92,7 @@ class UserInterface(object):
         self.current_status = status
 
         if self.timer.running:
-            self.status_icon.set_from_file(
-                PASS_ICON if status == 0 else FAIL_ICON
-            )
+            self._set_icon()
 
         if pynotify is not None:
             pynotify.init('dojotools')
@@ -120,7 +123,5 @@ class UserInterface(object):
         self.timer.pause()
 
     def start_timer(self, widget=None):
-        self.status_icon.set_from_file(
-            PASS_ICON if self.current_status == 0 else FAIL_ICON
-        )
+        self._set_icon()
         self.timer.start()
