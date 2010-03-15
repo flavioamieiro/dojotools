@@ -26,6 +26,7 @@ import os
 import sys
 import re
 import subprocess
+from time import ctime
 from optparse import OptionParser
 import gtk
 import gobject
@@ -59,7 +60,7 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns_file):
+    def __init__(self, ui, directory, commands, patterns_file, commit=False):
         """
         'directory' is the directory to be watched for changes.
 
@@ -77,6 +78,7 @@ class Monitor(object):
         self.commands = commands
         self.patterns = self._get_patterns(patterns_file)
         self.ui = ui
+        self.commit = commit
 
         gobject.timeout_add(1000, self.check)
 
@@ -117,6 +119,23 @@ class Monitor(object):
             files = [f for f in files if not p.match(f)]
         return files
 
+    def git_commit_all(self):
+        """
+        Adds all files and commits them using git
+        """
+        msg = ctime()
+        process = subprocess.Popen(
+            "git add . && git commit -m '%s'" % msg,
+            shell=True,
+            cwd=self.directory,
+        )
+
+        #if git returns 128 it means 'command not found' or 'not a git repo'
+        if process.wait() == 128:
+            error = ('Impossible to commit to repository. '
+                    'Make sure git is installed an this is a valid repository')
+            raise OSError(error)
+
     def run_command(self, test_cmd):
         """
         As the name says, runs a command and waits for it to finish
@@ -143,6 +162,11 @@ class Monitor(object):
         """
         m_time_list = []
         for root, dirs, files in os.walk(self.directory):
+            # We must ignore all the files in .git directory because
+            # any commit changes them. Taking this directory into
+            # consideration would cause an infinite loop.
+            if '.git' in root:
+                continue
             files = self._filter_files(files)
             # Be careful. The += operator works as the extend method
             # on mutable objects. For more information refer to
@@ -155,6 +179,8 @@ class Monitor(object):
         if new_sum != self.old_sum:
             for command in self.commands:
                 self.run_command(command)
+            if self.commit:
+                self.git_commit_all()
             self.old_sum = new_sum
 
         # This method must return True so gobject.timeout_add runs it again
@@ -170,6 +196,17 @@ def parse_options():
         to use quotes if you command has spaces in it.
     """.replace('  ', '')
     parser = OptionParser(usage, description=description)
+    parser.add_option(
+        '-c',
+        '--commit',
+        action='store_true',
+        dest = 'commit',
+        help = (
+            'if this flag is used, a git commit will '
+            'be issued whenever the files change'
+        ),
+        default = False,
+    )
     parser.add_option(
         '-d',
         '--directory',
@@ -226,7 +263,13 @@ if __name__ == '__main__':
 
         timer = Timer(options.round_time)
         ui = UserInterface(timer)
-        monitor = Monitor(ui, options.directory, args, options.patterns_file)
+        monitor = Monitor(
+            ui,
+            options.directory,
+            args,
+            options.patterns_file,
+            options.commit,
+        )
 
         gtk.main()
 
