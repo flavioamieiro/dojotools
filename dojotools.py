@@ -264,11 +264,11 @@ if __name__ == '__main__':
         timer = Timer(options.round_time)
         ui = UserInterface(timer)
         monitor = Monitor(
-            ui,
-            options.directory,
-            args,
-            options.patterns_file,
-            options.commit,
+            ui = ui,
+            directory = options.directory,
+            commands = args,
+            patterns_file = options.patterns_file,
+            commit = options.commit,
         )
 
         gtk.main()
