@@ -24,7 +24,7 @@ If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 
 import os
 import sys
-import re
+from fnmatch import fnmatch
 import subprocess
 from time import ctime
 from optparse import OptionParser
@@ -84,15 +84,16 @@ class Monitor(object):
 
     def _get_patterns(self, patterns_file):
         """
-        Reads `patterns_file' and returns a list of compiled regexes with
-        every pattern found in the file + the file name.
+        Reads `patterns_file' and returns a list of patterns found in
+        the patterns file, so they can be used in fnmatch.
+
+        Patterns should be Unix style.
+
+        For more information, type help(fnmatch) in a python shell
         """
         try:
             with open(patterns_file, 'r') as f:
-                patterns = [
-                    p.strip().replace('*.', '.*\.')
-                    for p in f.readlines()
-                ]
+                patterns = [pattern.strip() for pattern in  f.readlines()]
         except IOError:
             sys.stdout.write(
                 'Could not find %s. Patterns will not be ignored\n'
@@ -102,8 +103,6 @@ class Monitor(object):
 
         # Add patterns_file to the ignored patterns so it won't be tracked
         patterns += [os.path.basename(patterns_file)]
-
-        patterns = [re.compile(p) for p in patterns]
 
         return patterns
 
@@ -116,7 +115,7 @@ class Monitor(object):
         files is not an instance attribute)
         """
         for p in self.patterns:
-            files = [f for f in files if not p.match(f)]
+            files = [f for f in files if not fnmatch(f, p)]
         return files
 
     def git_commit_all(self):
