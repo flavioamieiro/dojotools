@@ -225,9 +225,6 @@ def parse_options():
         dest = 'patterns_file',
         help = (
             'Defines the file with patterns to ignore. '
-            'Make sure the patterns in the file are valid '
-            'python regular expressions. '
-            'Patterns like *.ext are also accepted.'
         ),
         metavar = 'PATTERNS_FILE',
         default = None,
