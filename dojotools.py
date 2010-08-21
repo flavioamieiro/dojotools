@@ -30,8 +30,7 @@ from time import ctime
 from optparse import OptionParser
 import gtk
 import gobject
-import serial
-import glob
+import arduino
 
 from ui import UserInterface
 
@@ -138,15 +137,6 @@ class Monitor(object):
                     'Make sure git is installed an this is a valid repository')
             raise OSError(error)
 
-    def arduino_communication(self, status):
-        arduino = serial.Serial(glob.glob('/dev/ttyUSB*')[0], 9600)
-        arduino.timeout = 0.1
-        if status:
-            arduino.write('R')
-        else:
-            arduino.write('G')
-        arduino.close()
-
     def run_command(self, test_cmd):
         """
         As the name says, runs a command and waits for it to finish
@@ -162,11 +152,13 @@ class Monitor(object):
         output = process.stdout.read()
         output += process.stderr.read()
         status = process.wait()
-        if self.arduino:
-            try:
-                self.arduino_communication(status)
-            except:
-                print 'Erro com a comunicação com o Arduino'
+        try:
+            if self.arduino and status:
+                arduino.send_message('R')
+            elif self.arduino and not status:
+                arduino.send_message('G')
+        except:
+            print 'Algum erro de comunicação com o Arduino ocorreu!'
 
         self.ui.show_command_results(status, output)
 
