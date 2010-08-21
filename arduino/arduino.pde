@@ -2,6 +2,7 @@
 #define PIN_5_VOLTS 6
 #define PIN_GREEN 5
 #define PIN_BLUE 4
+#define SPEAKER 9
 #define DELAY_TIME 1000
 
 void setup(){
@@ -31,15 +32,20 @@ void turnOffAll(){
     digitalWrite(PIN_GREEN, HIGH);
     digitalWrite(PIN_RED, HIGH);
     digitalWrite(PIN_BLUE, HIGH);
+    digitalWrite(SPEAKER, LOW);
 }
 
-void blinkPin(int pin){
+void blinkPin(int pin, int sound){
     for (int i = 0; i < 3; i++){
         turnOffAll();
         delay(DELAY_TIME);
+        if (sound){
+            analogWrite(SPEAKER, 127);
+        }
         turnPinOn(pin);
         delay(DELAY_TIME);
     }
+    digitalWrite(SPEAKER, LOW);
 }
 
 void loop(){
@@ -47,14 +53,14 @@ void loop(){
         char option = Serial.read();
         if (option == 'R'){
             if (pinIsOn(PIN_GREEN)){
-                blinkPin(PIN_RED);
+                blinkPin(PIN_RED, 1);
             } else {
                 turnPinOn(PIN_RED);
             }
         }
         if (option == 'G'){
             if (pinIsOn(PIN_RED)){
-                blinkPin(PIN_GREEN);
+                blinkPin(PIN_GREEN, 0);
             } else {
                 turnPinOn(PIN_GREEN);
             }
