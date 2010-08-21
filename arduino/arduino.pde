@@ -2,6 +2,7 @@
 #define pin5Volts 6
 #define pinGreen 5
 #define pinBlue 4
+#define delayTime 1000
 
 void setup(){
     Serial.begin(9600);
@@ -27,14 +28,54 @@ void turnGreenOn(){
     digitalWrite(pinBlue, HIGH);
 }
 
+void turnOffAll(){
+    digitalWrite(pinGreen, HIGH);
+    digitalWrite(pinRed, HIGH);
+    digitalWrite(pinBlue, HIGH);
+}
+
+void redIsOn(){
+    return digitalRead(pinRed) == LOW;
+}
+
+void greenIsOn(){
+    return digitalRead(pinGreen) == LOW
+}
+
+void blinkGreen(){
+    for (int i = 0; i < 3; i++){
+        turnOffAll();
+        delay(delayTime);
+        turnGreenOn();
+        delay(delayTime);
+    }
+}
+
+void blinkRed(){
+    for (int i = 0; i < 3; i++){
+        turnOffAll();
+        delay(delayTime);
+        turnRedOn();
+        delay(delayTime);
+    }
+}
+
 void loop(){
     if (Serial.available()){
         char option = Serial.read();
         if (option == 'R'){
-            turnRedOn();
+            if (greenIsOn()){
+                blinkRed();
+            } else {
+                turnRedOn();
+            }
         }
         if (option == 'G'){
-            turnGreenOn();
+            if (redIsOn()){
+                blinkGreen();
+            } else {
+                turnGreenOn();
+            }
         }
     }
 }
