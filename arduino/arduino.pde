@@ -3,7 +3,7 @@
 #define PIN_GREEN 5
 #define PIN_BLUE 4
 #define SPEAKER 9
-#define DELAY_TIME 1000
+#define DELAY_TIME 700
 
 void setup(){
     Serial.begin(9600);
