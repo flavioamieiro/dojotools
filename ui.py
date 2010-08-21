@@ -24,6 +24,7 @@ import os
 import sys
 import gtk
 import gobject
+import arduino
 
 try:
     import pynotify
@@ -41,9 +42,10 @@ __all__ = ['UserInterface']
 
 class UserInterface(object):
 
-    def __init__(self, timer):
+    def __init__(self, timer, arduino=False):
         self.timer = timer
         self.current_status = 0
+        self.arduino = arduino
 
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_file(PASS_ICON)
@@ -94,6 +96,8 @@ class UserInterface(object):
 
     def warn_time_is_up(self):
         """Shows a dialog warning the pilot that his time is up"""
+        if self.arduino:
+            arduino.send_message('T')
         dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
         dialog.set_default_size(180, 120)
         dialog.set_keep_above(True)
