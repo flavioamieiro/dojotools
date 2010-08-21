@@ -163,7 +163,10 @@ class Monitor(object):
         output += process.stderr.read()
         status = process.wait()
         if self.arduino:
-            self.arduino_communication(status)
+            try:
+                self.arduino_communication(status)
+            except:
+                print 'Erro com a comunicação com o Arduino'
 
         self.ui.show_command_results(status, output)
 
