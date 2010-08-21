@@ -239,6 +239,17 @@ def parse_options():
         help = 'Define the time of each round',
         default = 300
     )
+
+    parser.add_option(
+        '-a',
+        '--arduino',
+        action = 'store_true',
+        dest = 'arduino',
+        help = (
+            'If this flag is used an interface with Arduino will be used'
+        ),
+        default = False,
+    )
     return parser.parse_args()
 
 
