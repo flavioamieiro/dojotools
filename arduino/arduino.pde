@@ -65,5 +65,10 @@ void loop(){
                 turnPinOn(PIN_GREEN);
             }
         }
+        if (option == 'T'){
+            analogWrite(SPEAKER, 127);
+            delay(DELAY_TIME * 3);
+            digitalWrite(SPEAKER, LOW);
+        }
     }
 }
