@@ -16,16 +16,15 @@ void setup(){
     digitalWrite(pinGreen, HIGH);
 }
 
-void turnRedOn(){
-    digitalWrite(pinRed, LOW);
+void turnPinOn(int pin){
+    digitalWrite(pinRed, HIGH);
     digitalWrite(pinGreen, HIGH);
     digitalWrite(pinBlue, HIGH);
+    digitalWrite(pin, LOW);
 }
 
-void turnGreenOn(){
-    digitalWrite(pinGreen, LOW);
-    digitalWrite(pinRed, HIGH);
-    digitalWrite(pinBlue, HIGH);
+int pinIsOn(int pin){
+  return digitalRead(pin) == LOW;
 }
 
 void turnOffAll(){
@@ -34,28 +33,11 @@ void turnOffAll(){
     digitalWrite(pinBlue, HIGH);
 }
 
-void redIsOn(){
-    return digitalRead(pinRed) == LOW;
-}
-
-void greenIsOn(){
-    return digitalRead(pinGreen) == LOW
-}
-
-void blinkGreen(){
+void blinkPin(int pin){
     for (int i = 0; i < 3; i++){
         turnOffAll();
         delay(delayTime);
-        turnGreenOn();
-        delay(delayTime);
-    }
-}
-
-void blinkRed(){
-    for (int i = 0; i < 3; i++){
-        turnOffAll();
-        delay(delayTime);
-        turnRedOn();
+        turnPinOn(pin);
         delay(delayTime);
     }
 }
@@ -64,17 +46,17 @@ void loop(){
     if (Serial.available()){
         char option = Serial.read();
         if (option == 'R'){
-            if (greenIsOn()){
-                blinkRed();
+            if (pinIsOn(pinGreen)){
+                blinkPin(pinRed);
             } else {
-                turnRedOn();
+                turnPinOn(pinRed);
             }
         }
         if (option == 'G'){
-            if (redIsOn()){
-                blinkGreen();
+            if (pinIsOn(pinRed)){
+                blinkPin(pinGreen);
             } else {
-                turnGreenOn();
+                turnPinOn(pinGreen);
             }
         }
     }
