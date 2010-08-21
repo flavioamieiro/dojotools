@@ -60,7 +60,7 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns_file, commit=False):
+    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False):
         """
         'directory' is the directory to be watched for changes.
 
@@ -79,6 +79,7 @@ class Monitor(object):
         self.patterns = self._get_patterns(patterns_file)
         self.ui = ui
         self.commit = commit
+        self.arduino = arduino
 
         gobject.timeout_add(1000, self.check)
 
@@ -276,6 +277,7 @@ if __name__ == '__main__':
             commands = args,
             patterns_file = options.patterns_file,
             commit = options.commit,
+            arduino = options.arduino,
         )
 
         gtk.main()
