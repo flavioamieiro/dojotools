@@ -1,25 +1,25 @@
-#define pinRed 7
-#define pin5Volts 6
-#define pinGreen 5
-#define pinBlue 4
-#define delayTime 1000
+#define PIN_RED 7
+#define PIN_5_VOLTS 6
+#define PIN_GREEN 5
+#define PIN_BLUE 4
+#define DELAY_TIME 1000
 
 void setup(){
     Serial.begin(9600);
-    pinMode(pinRed, OUTPUT);
-    pinMode(pin5Volts, OUTPUT);
-    pinMode(pinGreen, OUTPUT);
-    pinMode(pinBlue, OUTPUT);
-    digitalWrite(pinBlue, HIGH);
-    digitalWrite(pin5Volts, HIGH);
-    digitalWrite(pinRed, HIGH);
-    digitalWrite(pinGreen, HIGH);
+    pinMode(PIN_RED, OUTPUT);
+    pinMode(PIN_5_VOLTS, OUTPUT);
+    pinMode(PIN_GREEN, OUTPUT);
+    pinMode(PIN_BLUE, OUTPUT);
+    digitalWrite(PIN_BLUE, HIGH);
+    digitalWrite(PIN_5_VOLTS, HIGH);
+    digitalWrite(PIN_RED, HIGH);
+    digitalWrite(PIN_GREEN, HIGH);
 }
 
 void turnPinOn(int pin){
-    digitalWrite(pinRed, HIGH);
-    digitalWrite(pinGreen, HIGH);
-    digitalWrite(pinBlue, HIGH);
+    digitalWrite(PIN_RED, HIGH);
+    digitalWrite(PIN_GREEN, HIGH);
+    digitalWrite(PIN_BLUE, HIGH);
     digitalWrite(pin, LOW);
 }
 
@@ -28,17 +28,17 @@ int pinIsOn(int pin){
 }
 
 void turnOffAll(){
-    digitalWrite(pinGreen, HIGH);
-    digitalWrite(pinRed, HIGH);
-    digitalWrite(pinBlue, HIGH);
+    digitalWrite(PIN_GREEN, HIGH);
+    digitalWrite(PIN_RED, HIGH);
+    digitalWrite(PIN_BLUE, HIGH);
 }
 
 void blinkPin(int pin){
     for (int i = 0; i < 3; i++){
         turnOffAll();
-        delay(delayTime);
+        delay(DELAY_TIME);
         turnPinOn(pin);
-        delay(delayTime);
+        delay(DELAY_TIME);
     }
 }
 
@@ -46,17 +46,17 @@ void loop(){
     if (Serial.available()){
         char option = Serial.read();
         if (option == 'R'){
-            if (pinIsOn(pinGreen)){
-                blinkPin(pinRed);
+            if (pinIsOn(PIN_GREEN)){
+                blinkPin(PIN_RED);
             } else {
-                turnPinOn(pinRed);
+                turnPinOn(PIN_RED);
             }
         }
         if (option == 'G'){
-            if (pinIsOn(pinRed)){
-                blinkPin(pinGreen);
+            if (pinIsOn(PIN_RED)){
+                blinkPin(PIN_GREEN);
             } else {
-                turnPinOn(pinGreen);
+                turnPinOn(PIN_GREEN);
             }
         }
     }
