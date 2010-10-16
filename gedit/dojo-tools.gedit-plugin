@@ -1,0 +1,9 @@
+[Gedit Plugin]
+Loader=python
+Module=dojotools-gedit
+IAge=2
+Name=Dojo tools
+Description=Dojotools-gedit is intended to help in coding dojo sessions.
+Authors=César Frias <cagfrias@gmail.com>, Luiz Bonsaver <luiz.bonsaver@gmail.com>, Natasha Paiva <nattynpaiva@gmail.com>
+Copyright=GPL License
+Website=http://www.gedit.org
