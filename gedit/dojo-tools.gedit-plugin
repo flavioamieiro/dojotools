@@ -1,6 +1,6 @@
 [Gedit Plugin]
 Loader=python
-Module=dojotools-gedit.py
+Module=dojotools-gedit
 IAge=2
 Name=Dojo tools
 Description=Dojotools-gedit is intended to help in coding dojo sessions.
