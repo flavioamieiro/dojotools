@@ -13,17 +13,19 @@ from dojotools import Monitor, Timer
 
 class DojoToolsGeditHelper:
     def __init__(self, plugin, window):
+        print "Dojotools update for", self._window
         self._window = window
         self._plugin = plugin
 
     def deactivate(self):
+        print "Dojotools update for", self._window
         self._window = None
         self._plugin = None
 
     def update_ui(self):
         # Called whenever the window has been updated (active tab
         # changed, etc.)
-        print "Plugin update for", self._window
+        print "Dojotools update for", self._window
 
 class DojoToolsGedit(gedit.Plugin):
     def __init__(self):
@@ -41,8 +43,8 @@ class DojoToolsGedit(gedit.Plugin):
             commit = False,
         )
 
-        gtk.main()
         self._instances[window] = DojoToolsGeditHelper(self, window)
+        gtk.main()
 
     def deactivate(self, window):
         self._instances[window].deactivate()
