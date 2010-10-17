@@ -139,6 +139,7 @@ class Monitor(object):
         """
         As the name says, runs a command and waits for it to finish
         """
+        test_cmd = self.commands
         process = subprocess.Popen(
             test_cmd,
             shell = True,
@@ -173,7 +174,6 @@ class Monitor(object):
             m_time_list += [
                 os.stat(os.path.join(root, f)).st_mtime for f in files
             ]
-
         new_sum = sum(m_time_list)
         if new_sum != self.old_sum:
             for command in self.commands:
