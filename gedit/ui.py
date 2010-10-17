@@ -119,7 +119,6 @@ class UserInterface(object):
 
         test_output_dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
         test_output_dialog.set_default_size(800, 300)
-        test_output_dialog.set_keep_above(True)
         test_output_dialog.vbox.pack_start(gtk.Label(output))
         test_output_dialog.show_all()
         test_output_dialog.run()
