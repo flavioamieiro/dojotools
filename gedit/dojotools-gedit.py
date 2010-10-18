@@ -42,6 +42,7 @@ class DojoToolsGedit(gedit.Plugin):
     def update_ui(self, window):
         if not self.has_monitor() or self.commands == []:
             self.create_monitor(window)
+            #self.monitor.check()
         self._instances[window].update_ui()
 
     def has_monitor(self):
@@ -54,14 +55,17 @@ class DojoToolsGedit(gedit.Plugin):
             return False
 
     def create_monitor(self, window):
-        self.monitor = Monitor(
-            ui = self.ui,
-            directory = '/home/cesar/Dojo/codigosDojo/setembro/25/',
-            commands = self.get_commands(window),
-            patterns_file = '/home/cesar/Dojo/codigosDojo/setembro/25/.ignore',
-            commit = False,
-        )
-        return self.monitor
+        commands = list()
+        commands = self.get_commands(window)
+        if commands != []:
+            self.monitor = Monitor(
+                ui = self.ui,
+                directory = '/home/cesar/Dojo/codigosDojo/setembro/25/',
+                commands = commands,
+                patterns_file = '/home/cesar/Dojo/codigosDojo/setembro/25/.ignore',
+                commit = False,
+            )
+            return self.monitor
 
     def get_commands(self, window):
         documents = window.get_documents()
