@@ -40,7 +40,7 @@ class DojoToolsGedit(gedit.Plugin):
         del self._instances[window]
 
     def update_ui(self, window):
-        if not self.has_monitor() or self.commands == []:
+        if not self.has_monitor() or self.document == '':
             self.create_monitor(window)
         self._instances[window].update_ui()
 
@@ -54,24 +54,26 @@ class DojoToolsGedit(gedit.Plugin):
             return False
 
     def create_monitor(self, window):
-        commands = list()
-        commands = self.get_commands(window)
-        if commands != []:
+        self.commands = str()
+        self.get_attributes_to_monitor(window)
+        if self.commands != '':
             self.monitor = Monitor(
                 ui = self.ui,
-                directory = '/home/cesar/Dojo/codigosDojo/setembro/25/',
-                commands = commands,
-                patterns_file = '/home/cesar/Dojo/codigosDojo/setembro/25/.ignore',
+                directory = self.directory,
+                commands = self.commands,
+                patterns_file = self.patterns_file,
                 commit = False,
             )
             return self.monitor
 
-    def get_commands(self, window):
+    def get_attributes_to_monitor(self, window):
         documents = window.get_documents()
-        self.commands = list()
+        commands = list()
         for document in documents:
             if document.get_uri():
-                teste = document.get_uri().strip('file://')
-                self.commands = 'python /' + teste
-        return self.commands
+                self.document = document.get_uri().strip('file://')
+                self.commands = 'python /' + self.document
+                self.directory = '/' + self.document.rpartition('/')[0] + '/'
+                self.patterns_file = '/' + self.directory + '.ignore'
+        print self.document, self.commands, self.directory, self.patterns_file
 
