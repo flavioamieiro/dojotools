@@ -42,7 +42,6 @@ class DojoToolsGedit(gedit.Plugin):
     def update_ui(self, window):
         if not self.has_monitor() or self.commands == []:
             self.create_monitor(window)
-            #self.monitor.check()
         self._instances[window].update_ui()
 
     def has_monitor(self):
