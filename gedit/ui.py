@@ -91,7 +91,6 @@ class UserInterface(object):
         """Shows a dialog warning the pilot that his time is up"""
         dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
         dialog.set_default_size(180, 120)
-        dialog.set_keep_above(True)
         dialog.vbox.pack_start(gtk.Label('Your time is up!'))
         dialog.show_all()
         dialog.run()
