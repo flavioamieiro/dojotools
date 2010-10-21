@@ -37,14 +37,21 @@ class DojoToolsGedit(gedit.Plugin):
         self._instances[window] = DojoToolsGeditHelper(self, window)
 
     def deactivate(self, window):
-        sys.exit()
         self._instances[window].deactivate()
         del self._instances[window]
+        #sys.exit()
 
     def update_ui(self, window):
         if not self.has_monitor() or self.document == '':
             self.create_monitor(window)
         self._instances[window].update_ui()
+
+    def is_configurable(self):
+        return True
+
+    def create_configure_dialog(self):
+        dialog = gtk.Dialog('Dojotools configuration')
+        return dialog
 
     def has_monitor(self):
         try:
