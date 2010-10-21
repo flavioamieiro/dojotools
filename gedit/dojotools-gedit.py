@@ -5,6 +5,7 @@
 
 import os
 import gtk
+import sys
 import gedit
 import gobject
 
@@ -36,6 +37,7 @@ class DojoToolsGedit(gedit.Plugin):
         self._instances[window] = DojoToolsGeditHelper(self, window)
 
     def deactivate(self, window):
+        sys.exit()
         self._instances[window].deactivate()
         del self._instances[window]
 
