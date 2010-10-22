@@ -49,9 +49,20 @@ class DojoToolsGedit(gedit.Plugin):
     def is_configurable(self):
         return True
 
+    def enter_callback(self, widget, entry):
+        self.entry_text = entry.get_text()
+
     def create_configure_dialog(self):
-        dialog = gtk.Dialog('Dojotools configuration')
-        return dialog
+        configure_dialog = gtk.Dialog('Dojotools configuration')
+        configure_dialog.set_default_size(300, 100)
+        entry = gtk.Entry()
+        entry.set_text("Commands")
+        entry.connect("activate", self.enter_callback, entry)
+        configure_dialog.vbox.pack_start(entry, True, True, 0)
+        entry.show()
+        configure_dialog.show()
+
+        return configure_dialog
 
     def has_monitor(self):
         try:
