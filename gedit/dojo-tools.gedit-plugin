@@ -3,6 +3,7 @@ Loader=python
 Module=dojotools-gedit
 IAge=2
 Name=Dojo tools
+Icon=kimono
 Description=Dojotools-gedit is intended to help in coding dojo sessions.
 Authors=César Frias <cagfrias@gmail.com>, \nLuiz Bonsaver <luiz.bonsaver@gmail.com>, \nNatasha Paiva <nattynpaiva@gmail.com>
 Copyright=Copyright © 2010 César Frias, Luiz Bonsaver, Natasha Paiva
