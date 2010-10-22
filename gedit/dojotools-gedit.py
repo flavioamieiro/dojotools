@@ -56,7 +56,7 @@ class DojoToolsGedit(gedit.Plugin):
         configure_dialog = gtk.Dialog('Dojotools configuration')
         configure_dialog.set_default_size(300, 100)
         entry = gtk.Entry()
-        entry.set_text("Commands")
+        entry.set_text("Type the commands and press Enter")
         entry.connect("activate", self.enter_callback, entry)
         configure_dialog.vbox.pack_start(entry, True, True, 0)
         entry.show()
