@@ -22,11 +22,11 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 If you find any bugs or have any suggestions email: amieiro.flavio@gmail.com
 """
+
 import os
 import sys
 import gtk
 import gobject
-
 
 IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
 PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
@@ -34,9 +34,64 @@ FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 __all__ = ['UserInterface']
 
+class OutputArea(gtk.HBox):
+    """
+    Criado por gabriel.pa.oliveira@gmail.com para direcionar o output do dojotools para o bottom panel
+    Roubado com todos os creditos do RunInPython.py    
+    """
+
+    def __init__(self, geditwindow):
+        gtk.HBox.__init__(self)
+
+        self.geditwindow = geditwindow
+
+        # Create a ListStore for the output we'll receive from the Python interpreter
+        self.output_data = gtk.ListStore(str)
+
+        # Create a TreeView (we'll use it just as a list though) for the output data
+        self.output_list = gtk.TreeView(self.output_data)
+
+        # Create a cell for the list
+        cell = gtk.TreeViewColumn("Dojo Tools")
+
+        # Add the cell to the TreeView
+        self.output_list.append_column(cell)
+
+        # Create a text renderer for our cell
+        text_renderer = gtk.CellRendererText()
+
+        # Add that text renderer to the cell
+        cell.pack_start(text_renderer, True)
+
+        # Set it to text
+        cell.add_attribute(text_renderer, "text", 0)
+
+        # Create a scrolled window for the TreeView and add the TreeView to that scrolled window.
+        scrolled_window = gtk.ScrolledWindow()
+        scrolled_window.add(self.output_list)
+
+        # Add the scrolled window to this HBox
+        self.pack_start(scrolled_window)
+
+        #TODO: add another panel above/below that scrolled_window with icon-red-green and timer
+
+        # Show everything
+        self.show_all()
+
+    def add_output(self, line):
+        """ Deveria exibir a linha no output  e descer a barra de rolagem"""
+
+        if (line != ""):
+            # Add the new data to the TreeView we made
+            self.output_data.append( (line,) )
+
+            # Scroll to the end of the TreeView
+            self.output_list.set_cursor(len(self.output_data) - 1)
+
+
 class UserInterface(object):
 
-    def __init__(self, timer):
+    def __init__(self, timer, window=None):
         self.timer = timer
         self.current_status = 0
 
@@ -45,9 +100,27 @@ class UserInterface(object):
         self._create_menu()
         self.status_icon.set_visible(True)
 
+        self.window = window
+        self.create_output(self.window)
+
         self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
+
+    def create_output(self, window):
+        # Get the bottom panel.
+        panel = window.get_bottom_panel()
+
+        # Create an output area object (HBox) where we'll store the Python interpreter's output.
+        self.output_area = OutputArea(window)
+
+        # Add the item to the panel.
+        panel.add_item(self.output_area, "Dojo Tools Output", gtk.Image())
+
+    def remove_output(self):
+        panel = self.window.get_bottom_panel()
+
+        panel.remove_item(self.output_area)
 
     def _create_menu(self):
         self.menu = gtk.Menu()
@@ -116,13 +189,7 @@ class UserInterface(object):
         if self.timer.running:
             self._set_icon()
 
-        test_output_dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
-        test_output_dialog.set_default_size(800, 300)
-        test_output_dialog.vbox.pack_start(gtk.Label(output))
-        test_output_dialog.show_all()
-        test_output_dialog.run()
-        test_output_dialog.destroy()
-
+        self.output_area.add_output(output)
 
     def update_timer(self):
         if self.timer.time_left:
