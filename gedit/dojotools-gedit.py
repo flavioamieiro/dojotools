@@ -5,7 +5,6 @@
 
 import os
 import gtk
-import sys
 import gedit
 import gobject
 
@@ -33,13 +32,13 @@ class DojoToolsGedit(gedit.Plugin):
 
     def activate(self, window):
         timer = Timer(300)
-        self.ui = UserInterface(timer)
+        self.ui = UserInterface(timer, window)
         self._instances[window] = DojoToolsGeditHelper(self, window)
 
     def deactivate(self, window):
+        self.ui.remove_output()
         self._instances[window].deactivate()
         del self._instances[window]
-        #sys.exit()
 
     def update_ui(self, window):
         if not self.has_monitor() or self.document == '':
@@ -95,5 +94,8 @@ class DojoToolsGedit(gedit.Plugin):
                 self.commands = 'python /' + self.document
                 self.directory = '/' + self.document.rpartition('/')[0] + '/'
                 self.patterns_file = '/' + self.directory + '.ignore'
-        print self.document, self.commands, self.directory, self.patterns_file
 
+        try:
+            print self.document, self.commands, self.directory, self.patterns_file
+        except:
+            pass
