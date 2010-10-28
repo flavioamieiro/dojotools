@@ -40,6 +40,7 @@ class DojoToolsGedit(gedit.Plugin):
         self._instances[window].deactivate()
         del self._instances[window]
 
+    #TODO: Precisa ser refatorada, acho que o hasattr resolve isso
     def update_ui(self, window):
         if not self.has_monitor() or self.document == '':
             self.create_monitor(window)
@@ -48,6 +49,7 @@ class DojoToolsGedit(gedit.Plugin):
     def is_configurable(self):
         return True
 
+    #TODO: Mover as 3 próximas funções para o ui
     def enter_callback(self, widget, entry):
         self.entry_text = entry.get_text()
 
@@ -85,6 +87,7 @@ class DojoToolsGedit(gedit.Plugin):
             )
             return self.monitor
 
+    #TODO: Pegar dados a partir da janela de configuração
     def get_attributes_to_monitor(self, window):
         documents = window.get_documents()
         commands = list()
