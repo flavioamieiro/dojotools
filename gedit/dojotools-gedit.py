@@ -15,10 +15,12 @@ class DojoToolsGeditHelper:
     def __init__(self, plugin, window):
         self._window = window
         self._plugin = plugin
+        print 'Plugin Dojo-tools initialized'
 
     def deactivate(self):
         self._window = None
         self._plugin = None
+        print 'Plugin Dojo-tools deactivated'
 
     def update_ui(self):
         # Called whenever the window has been updated (active tab
@@ -40,9 +42,8 @@ class DojoToolsGedit(gedit.Plugin):
         self._instances[window].deactivate()
         del self._instances[window]
 
-    #TODO: Precisa ser refatorada, acho que o hasattr resolve isso
     def update_ui(self, window):
-        if not self.has_monitor() or self.document == '':
+        if not self.has_monitor() or not hasattr(self, 'document'):
             self.create_monitor(window)
         self._instances[window].update_ui()
 
@@ -67,13 +68,7 @@ class DojoToolsGedit(gedit.Plugin):
         return self.configure_dialog
 
     def has_monitor(self):
-        try:
-            if self.monitor:
-                return True
-            else:
-                return False
-        except:
-            return False
+        return hasattr(self, 'monitor')
 
     def create_monitor(self, window):
         self.get_attributes_to_monitor(window)
