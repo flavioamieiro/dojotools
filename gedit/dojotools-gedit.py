@@ -49,21 +49,22 @@ class DojoToolsGedit(gedit.Plugin):
     def is_configurable(self):
         return True
 
-    #TODO: Mover as 3 próximas funções para o ui
+    #TODO: Mover as 3 proximas funcoes para o ui
     def enter_callback(self, widget, entry):
-        self.entry_text = entry.get_text()
+        self.commands = entry.get_text()
+        self.configure_dialog.hide()
 
     def create_configure_dialog(self):
-        configure_dialog = gtk.Dialog('Dojotools configuration')
-        configure_dialog.set_default_size(300, 100)
+        self.configure_dialog = gtk.Dialog('Dojotools configuration')
+        self.configure_dialog.set_default_size(300, 100)
         entry = gtk.Entry()
         entry.set_text("Type the commands and press Enter")
         entry.connect("activate", self.enter_callback, entry)
-        configure_dialog.vbox.pack_start(entry, True, True, 0)
+        self.configure_dialog.vbox.pack_start(entry, True, True, 0)
         entry.show()
-        configure_dialog.show()
+        self.configure_dialog.show()
 
-        return configure_dialog
+        return self.configure_dialog
 
     def has_monitor(self):
         try:
@@ -75,9 +76,8 @@ class DojoToolsGedit(gedit.Plugin):
             return False
 
     def create_monitor(self, window):
-        self.commands = str()
         self.get_attributes_to_monitor(window)
-        if self.commands != '':
+        if hasattr(self, 'commands'):
             self.monitor = Monitor(
                 ui = self.ui,
                 directory = self.directory,
@@ -87,18 +87,15 @@ class DojoToolsGedit(gedit.Plugin):
             )
             return self.monitor
 
-    #TODO: Pegar dados a partir da janela de configuração
     def get_attributes_to_monitor(self, window):
         documents = window.get_documents()
-        commands = list()
         for document in documents:
             if document.get_uri():
                 self.document = document.get_uri().strip('file://')
-                self.commands = 'python /' + self.document
                 self.directory = '/' + self.document.rpartition('/')[0] + '/'
-                self.patterns_file = '/' + self.directory + '.ignore'
+                self.patterns_file = self.directory + '.ignore'
 
         try:
-            print self.document, self.commands, self.directory, self.patterns_file
+            print self.commands, 'commands'
         except:
             pass
