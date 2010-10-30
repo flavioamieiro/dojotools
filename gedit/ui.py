@@ -33,7 +33,7 @@ import gobject
 IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
 PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt_small.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt_small.png')
-KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono.png')
+KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono_small.png')
 
 __all__ = ['UserInterface']
 
