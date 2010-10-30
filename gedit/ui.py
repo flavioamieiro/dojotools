@@ -138,11 +138,6 @@ class UserInterface(object):
 		self.timer = timer
 		self.current_status = 0
 
-		self.status_icon = gtk.StatusIcon()
-		self.status_icon.set_from_file(PASS_ICON)
-		self._create_menu()
-		self.status_icon.set_visible(True)
-
 		self.window = window
 		self.create_output(self.window)
 
@@ -241,16 +236,12 @@ class UserInterface(object):
 			else: #already OK icon
 				pass
 
-		self.status_icon.set_from_file(
-		PASS_ICON if self.current_status == 0 else FAIL_ICON
-		)
 
 	def pause_timer(self, widget=None):
 		self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
 		self.timer.pause()
 
 	def start_timer(self, widget=None):
-		self._set_icon()
 		self.timer.start()
 
 	def warn_time_is_up(self):
@@ -290,7 +281,6 @@ class UserInterface(object):
 			(self.timer.time_left / 60),
 			(self.timer.time_left % 60)
 			)
-			self.status_icon.set_tooltip(time_str)
 
 			self.output_area.timer_label.set_text(time_str)
 		else:
