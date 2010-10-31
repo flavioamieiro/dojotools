@@ -146,8 +146,3 @@ class DojoToolsGedit(gedit.Plugin):
                 self.document = document.get_uri().strip('file://')
                 self.directory = '/' + self.document.rpartition('/')[0] + '/'
                 self.patterns_file = self.directory + '.ignore'
-
-        try:
-            print self.commands, 'commands'
-        except:
-            pass
