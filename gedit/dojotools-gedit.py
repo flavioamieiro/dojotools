@@ -51,7 +51,8 @@ class DojoToolsGedit(gedit.Plugin):
             timer = Timer(int(self.round_timer))
         except:
             #TODO: popup dialog error, maybe
-            return;
+            #return;
+            timer = Timer(300)
 
         if self.ui == None:
             self.ui = UserInterface(timer, window)
@@ -100,7 +101,7 @@ class DojoToolsGedit(gedit.Plugin):
         #entry_timer - use text default ?
         entry_timer = gtk.Entry()
         if self.round_timer == '':
-            entry_timer.set_text("Time in seconds")
+            entry_timer.set_text("Time in seconds, default is 300")
         else:
         	entry_timer.set_text(self.round_timer)
 
