@@ -8,8 +8,10 @@ import gtk
 import gedit
 import gobject
 
-from ui import UserInterface
+from dojotoolsUi import UserInterface
 from dojotools import Monitor, Timer
+
+
 
 class DojoToolsGeditHelper:
     def __init__(self, plugin, window):
@@ -30,16 +32,31 @@ class DojoToolsGeditHelper:
 class DojoToolsGedit(gedit.Plugin):
     def __init__(self):
         gedit.Plugin.__init__(self)
+
+        #Inits for dialog entries
+        self.round_timer = ''
+        self.commands = ''
+
+        #Init for Ui knows itself
+        self.ui = None
+
         self._instances = {}
 
     def activate(self, window):
-        #timer = Timer(self.round_timer or 300)
-        #self.ui = UserInterface(timer, window)
         self._instances[window] = DojoToolsGeditHelper(self, window)
 
     def start_plugin(self, window):
-        timer = Timer(int(self.round_timer))
-        self.ui = UserInterface(timer, window)
+
+        try:
+            timer = Timer(int(self.round_timer))
+        except:
+            #TODO: popup dialog error, maybe
+            return;
+
+        if self.ui == None:
+            self.ui = UserInterface(timer, window)
+        else:
+	        self.ui.re_initialize(timer)
 
     def deactivate(self, window):
         self.ui.remove_output()
@@ -47,7 +64,7 @@ class DojoToolsGedit(gedit.Plugin):
         del self._instances[window]
 
     def update_ui(self, window):
-        if not self.has_monitor() or not hasattr(self, 'document'):
+        if not self.has_monitor() or not self.has_document():
             self.create_monitor(window)
         self._instances[window].update_ui()
 
@@ -59,18 +76,45 @@ class DojoToolsGedit(gedit.Plugin):
         self.commands = entry_commands.get_text()
         self.round_timer = entry_timer.get_text()
         self.configure_dialog.hide()
+
+        #Refresh monitor commands
+        if self.has_monitor():
+            self.monitor.commands = self.commands
+
+        #Refresh Ui
+        self.start_plugin()
+
         return True
 
     def create_configure_dialog(self):
         self.configure_dialog = gtk.Dialog('Dojotools configuration')
         self.configure_dialog.set_default_size(300, 100)
+
+        #entry comands - use text default ?
         entry_commands = gtk.Entry()
+        if self.commands == '':
+        	entry_commands.set_text("Commands to execute")
+        else:
+        	entry_commands.set_text(self.commands)
+
+        #entry_timer - use text default ?
         entry_timer = gtk.Entry()
-        entry_commands.set_text("Type the commands and press Enter when finished")
-        entry_timer.set_text("Time in seconds")
-        entry_timer.connect("activate", self.enter_callback, entry_commands, entry_timer)
+        if self.round_timer == '':
+            entry_timer.set_text("Time in seconds")
+        else:
+        	entry_timer.set_text(self.round_timer)
+
+        #Gabriel se metendo aqui e botando um botao de OK para ativar as coisas
+        ok_button_box = gtk.HBox(False,0)
+        ok_button = gtk.Button('OK')
+        ok_button.connect("clicked", self.enter_callback, entry_commands, entry_timer)
+        ok_button_box.pack_start(ok_button)
+        ok_button_align = gtk.Alignment(0.5,0,0,0)
+        ok_button_align.add(ok_button_box)
+
         self.configure_dialog.vbox.pack_start(entry_commands, True, True, 0)
         self.configure_dialog.vbox.pack_start(entry_timer, True, True, 0)
+        self.configure_dialog.vbox.pack_start(ok_button_align, True, True, 0)
         self.configure_dialog.show_all()
 
         return self.configure_dialog
@@ -78,20 +122,21 @@ class DojoToolsGedit(gedit.Plugin):
     def has_monitor(self):
         return hasattr(self, 'monitor')
 
+    def has_document(self):
+        return hasattr(self, 'document')
+
     def create_monitor(self, window):
         self.get_attributes_to_monitor(window)
-        if hasattr(self, 'commands') \
-            and hasattr(self, 'round_timer') \
-            and hasattr(self, 'document'):
-            if not hasattr(self, 'monitor'):
-                self.start_plugin(window)
-                self.monitor = Monitor(
-                    ui = self.ui,
-                    directory = self.directory,
-                    commands = self.commands,
-                    patterns_file = self.patterns_file,
-                    commit = False,
-                )
+        if self.commands != '' and self.round_timer != '' and self.has_document():
+            #if not self.has_monitor(): Gabriel tirou essa restricao: ela eh controlada externamente
+            self.start_plugin(window)
+            self.monitor = Monitor(
+                ui = self.ui,
+                directory = self.directory,
+                commands = self.commands,
+                patterns_file = self.patterns_file,
+                commit = False,
+            )
             return self.monitor
 
     def get_attributes_to_monitor(self, window):
