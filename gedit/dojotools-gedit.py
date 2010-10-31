@@ -33,10 +33,6 @@ class DojoToolsGedit(gedit.Plugin):
     def __init__(self):
         gedit.Plugin.__init__(self)
 
-        #Inits for dialog entries
-        self.round_timer = ''
-        self.commands = ''
-
         #Init for Ui knows itself
         self.ui = None
 
@@ -70,7 +66,6 @@ class DojoToolsGedit(gedit.Plugin):
     def is_configurable(self):
         return True
 
-    #TODO: Mover as 3 proximas funcoes para o ui
     def enter_callback(self, widget, entry_commands, entry_timer):
         self.commands = entry_commands.get_text()
         self.round_timer = entry_timer.get_text()
@@ -91,14 +86,14 @@ class DojoToolsGedit(gedit.Plugin):
 
         #entry comands - use text default ?
         entry_commands = gtk.Entry()
-        if self.commands == '':
+        if not self.has_commands():
         	entry_commands.set_text("Commands to execute")
         else:
         	entry_commands.set_text(self.commands)
 
         #entry_timer - use text default ?
         entry_timer = gtk.Entry()
-        if self.round_timer == '':
+        if not self.has_round_timer():
             entry_timer.set_text("Time in seconds, default is 300")
         else:
         	entry_timer.set_text(self.round_timer)
@@ -124,10 +119,15 @@ class DojoToolsGedit(gedit.Plugin):
     def has_document(self):
         return hasattr(self, 'document')
 
+    def has_round_timer(self):
+        return hasattr(self, 'round_timer')
+
+    def has_commands(self):
+        return hasattr(self, 'commands')
+
     def create_monitor(self, window):
         self.get_attributes_to_monitor(window)
-        if self.commands != '' and self.round_timer != '' and self.has_document():
-            #if not self.has_monitor(): Gabriel tirou essa restricao: ela eh controlada externamente
+        if self.has_commands() and self.has_round_timer() and self.has_document():
             self.start_plugin(window)
             self.monitor = Monitor(
                 ui = self.ui,
