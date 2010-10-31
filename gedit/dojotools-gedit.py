@@ -33,9 +33,13 @@ class DojoToolsGedit(gedit.Plugin):
         self._instances = {}
 
     def activate(self, window):
-        timer = Timer(300)
-        self.ui = UserInterface(timer, window)
+        #timer = Timer(self.round_timer or 300)
+        #self.ui = UserInterface(timer, window)
         self._instances[window] = DojoToolsGeditHelper(self, window)
+
+    def start_plugin(self, window):
+        timer = Timer(int(self.round_timer))
+        self.ui = UserInterface(timer, window)
 
     def deactivate(self, window):
         self.ui.remove_output()
@@ -51,19 +55,23 @@ class DojoToolsGedit(gedit.Plugin):
         return True
 
     #TODO: Mover as 3 proximas funcoes para o ui
-    def enter_callback(self, widget, entry):
-        self.commands = entry.get_text()
+    def enter_callback(self, widget, entry_commands, entry_timer):
+        self.commands = entry_commands.get_text()
+        self.round_timer = entry_timer.get_text()
         self.configure_dialog.hide()
+        return True
 
     def create_configure_dialog(self):
         self.configure_dialog = gtk.Dialog('Dojotools configuration')
         self.configure_dialog.set_default_size(300, 100)
-        entry = gtk.Entry()
-        entry.set_text("Type the commands and press Enter")
-        entry.connect("activate", self.enter_callback, entry)
-        self.configure_dialog.vbox.pack_start(entry, True, True, 0)
-        entry.show()
-        self.configure_dialog.show()
+        entry_commands = gtk.Entry()
+        entry_timer = gtk.Entry()
+        entry_commands.set_text("Type the commands and press Enter when finished")
+        entry_timer.set_text("Time in seconds")
+        entry_timer.connect("activate", self.enter_callback, entry_commands, entry_timer)
+        self.configure_dialog.vbox.pack_start(entry_commands, True, True, 0)
+        self.configure_dialog.vbox.pack_start(entry_timer, True, True, 0)
+        self.configure_dialog.show_all()
 
         return self.configure_dialog
 
@@ -72,14 +80,18 @@ class DojoToolsGedit(gedit.Plugin):
 
     def create_monitor(self, window):
         self.get_attributes_to_monitor(window)
-        if hasattr(self, 'commands'):
-            self.monitor = Monitor(
-                ui = self.ui,
-                directory = self.directory,
-                commands = self.commands,
-                patterns_file = self.patterns_file,
-                commit = False,
-            )
+        if hasattr(self, 'commands') \
+            and hasattr(self, 'round_timer') \
+            and hasattr(self, 'document'):
+            if not hasattr(self, 'monitor'):
+                self.start_plugin(window)
+                self.monitor = Monitor(
+                    ui = self.ui,
+                    directory = self.directory,
+                    commands = self.commands,
+                    patterns_file = self.patterns_file,
+                    commit = False,
+                )
             return self.monitor
 
     def get_attributes_to_monitor(self, window):
