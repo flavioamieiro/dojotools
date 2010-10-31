@@ -50,8 +50,6 @@ class DojoToolsGedit(gedit.Plugin):
         try:
             timer = Timer(int(self.round_timer))
         except:
-            #TODO: popup dialog error, maybe
-            #return;
             timer = Timer(300)
 
         if self.ui == None:
