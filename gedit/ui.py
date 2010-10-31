@@ -5,7 +5,7 @@
 Dojotools - tools for your coding dojo session
 
 Copyright (C) 2010
-	César Frias <cagfrias@gmail.com>, 
+	César Frias <cagfrias@gmail.com>,
     Luiz Bonsaver <luiz.bonsaver@gmail.com>,
     Natasha Paiva <nattynpaiva@gmail.com>
     Gabriel Oliveira <gabriel.pa.oliveira@gmail.com>
@@ -33,27 +33,21 @@ import gobject
 IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
 PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt_small.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt_small.png')
-KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono_small.png')
+KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono.png')
 
 __all__ = ['UserInterface']
 
-# a common ui definition for toolbar additions
-ui_str = """<ui>
-  <toolbar name="ToolBar">
-    <separator />
-    <toolitem name="DojoTimer" action="DojoTimer" />
-  </toolbar>
-</ui>
-"""
-
 class OutputArea(gtk.VBox):
-    """
-    Criado por gabriel.pa.oliveira@gmail.com para direcionar o output do dojotools para o bottom panel
-    Roubado com todos os creditos do RunInPython.py    
-    """
+	"""
+	Criado por gabriel.pa.oliveira@gmail.com para direcionar o output do dojotools para o bottom panel
+	Roubado com todos os creditos do RunInPython.py
+	"""
 
-    def __init__(self, geditwindow, button_pause_play_event=None):
+	def __init__(self, timer):
 		gtk.VBox.__init__(self)
+
+		# Save our Timer fr further control
+		self.timer = timer
 
 		# Create a ListStore for the output we'll receive from the Python interpreter
 		self.output_data = gtk.ListStore(str)
@@ -89,47 +83,92 @@ class OutputArea(gtk.VBox):
 		# Create our Bar to Hold Icons - parameters (itensHasSameSpace , Spacing)
 		hbox = gtk.HBox(True, 0)
 
+		#create our stocks
+		self.stock_pause = gtk.Image()
+		self.stock_pause.set_from_stock(gtk.STOCK_MEDIA_PAUSE,1)
+
+		self.stock_play = gtk.Image()
+		self.stock_play.set_from_stock(gtk.STOCK_MEDIA_PLAY,1)
+
+		#create Stop/Start Button		
+		self.button_pause_play = gtk.Button()
+		self.button_pause_play.set_image(self.stock_pause)
+		self.button_pause_play.set_tooltip_text("Click to pause timer")
+		self.button_pause_play.connect("clicked", self.button_pause_play_event)
+
+		#create timer label
+		self.timer_label = gtk.Label('00:00')
+
+		#create our hbox_rigth to old our pass_icon
+		hbox_rigth = gtk.HBox(True,0)
+
 		#create pass-fault icon
 		self.pass_icon = gtk.Image()
 		self.pass_icon.set_from_file(PASS_ICON)
-		self.pass_icon.set_pixel_size(-10)
 		self.pass_icon_state = "pass"
 
-		#create Stop/Start Button
-		#self.button_pause_play = gtk.Button("Click to Pause Timer")
-		#self.button_pause_play.connect("clicked", button_pause_play_event, )
-
-		#create timer label 
-		self.timer_label = gtk.Label('00:00')
-
 		#put it all in hbox
-		hbox.pack_start(self.timer_label)
-		hbox.pack_end(self.pass_icon)
+		hbox.pack_start(self.button_pause_play, True, True, 0)
+		hbox.pack_start(self.timer_label, True, True, 10)
+		hbox.pack_start(self.pass_icon)
+
+		#create our align
+		hAlign = gtk.Alignment(0,0,0,0)
+		hAlign.add(hbox)
 
 		#put hbox in VBox
-		self.pack_start(hbox)
+		self.pack_start(hAlign)
 
 		# Show everything
 		self.show_all()
 
-    def add_output(self, line):
-        """ Deveria exibir a linha no output  e descer a barra de rolagem"""
+	def button_pause_play_event(self, widget):
+		"""Reconhece a partir do tooltip qual o estado do botao, afim de saber se start/stop o timer """
+		if "pause" in self.button_pause_play.get_tooltip_text():
+			self.stop_timer()
+			return;
 
-        if (line != ""):
-        	# If we have an empty_output we could not get our iterator or set nothing, so...    
-            if self.empty_output:
-            	# Just add the output line
-            	self.output_data.append( (line,) )
+		if "play" in  self.button_pause_play.get_tooltip_text():
+			self.start_timer()
+			return;
 
-            	# And down the flag
-            	self.empty_output = False
-            else:
-            	# Add the result to our list - in the same row
-            	iterator = self.output_data.get_iter_first()
-            	self.output_data.set(iterator, 0, line )
+	def start_timer(self):
+		"""Inicializa/Re-inicializa o timer e muda a imagem do botao de acordo """
 
-            # Scroll to the end of the TreeView
-            self.output_list.set_cursor(len(self.output_data) - 1)
+		self.button_pause_play.set_image(self.stock_pause)
+		self.button_pause_play.set_tooltip_text("Click to pause timer")
+
+		#pause timer
+		self.timer.start()
+
+	def stop_timer(self):
+		"""Pausa o timer e muda a imagem do botao de acordo """
+
+		self.button_pause_play.set_image(self.stock_play)
+		self.button_pause_play.set_tooltip_text("Click to play timer")
+
+		#pause timer
+		self.timer.pause()
+
+	def add_output(self, line):
+		""" Exibir a line no output e descer a barra de rolagem.
+		Apenas o ultimo teste fica visivel"""
+
+		if line != "":
+			# If we have an empty_output we could not get our iterator or set nothing, so...
+			if self.empty_output:
+				# Just add the output line
+				self.output_data.append( (line,) )
+
+				# And down the flag
+				self.empty_output = False
+			else:
+				# Add the result to our list - in the same row
+				iterator = self.output_data.get_iter_first()
+				self.output_data.set(iterator, 0, line )
+
+				# Scroll to the end of the TreeView
+				self.output_list.set_cursor(len(self.output_data) - 1)
 
 
 class UserInterface(object):
@@ -141,38 +180,16 @@ class UserInterface(object):
 		self.window = window
 		self.create_output(self.window)
 
-		self._insert_ui_items()
-
 		self.start_timer()
 
 		gobject.timeout_add(1000, self.update_timer)
-
-	def _create_menu(self):
-		self.menu = gtk.Menu()
-		self.pause_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
-		self.pause_item.connect('activate', self.pause_timer)
-
-		self.play_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PLAY)
-		self.play_item.connect('activate', self.start_timer)
-
-		self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-		self.quit_item.connect('activate', gtk.main_quit, gtk)
-
-		self.separator = gtk.MenuItem()
-
-		self.menu.append(self.pause_item)
-		self.menu.append(self.play_item)
-		self.menu.append(self.separator)
-		self.menu.append(self.quit_item)
-
-		self.status_icon.connect('popup-menu', self._show_menu, self.menu)
 
 	def create_output(self, window):
 		# Get the bottom panel.
 		panel = window.get_bottom_panel()
 
 		# Create an output area where we'll store the tests output.
-		self.output_area = OutputArea(window)
+		self.output_area = OutputArea(self.timer)
 
 		# Add the item to the panel with kimono icon
 		image = gtk.Image()
@@ -184,48 +201,13 @@ class UserInterface(object):
 
 		panel.remove_item(self.output_area)
 
-	def _insert_ui_items(self):
-		# Get the GtkUIManager
-		self._manager = self.window.get_ui_manager()
-
-		# Create a new action group
-		self._action_group = gtk.ActionGroup("DojoToolsPluginActions")
-
-		# Create a toggle action (convenience way: see 16.1.2.2. in PyGTK Manual)
-		self._action_group.add_toggle_actions([("DojoTimer",gtk.STOCK_MEDIA_PLAY,_("DojoTimer"),"","",self.on_toggle_stopDojo,False)])
-
-		# Insert the action group
-		self._manager.insert_action_group(self._action_group, -1)
-
-		# Add my item to the "Views" menu and to the Toolbar
-		self._ui_id = self._manager.add_ui_from_string(ui_str)
-
-	def remove_ui_items(self):
-		self._manager.remove_ui(self._ui_id)
-
-	def on_toggle_stopDojo(self, action):
-
-		_current_action = self._action_group.get_action("DojoTimer")
-		_is_active = _current_action.get_active()
-
-		if _is_active:
-			_current_action.stock_id = gtk.STOCK_MEDIA_PAUSE
-			self.timer.pause()
-		else:
-			_current_action.stock_id = gtk.STOCK_MEDIA_PLAY
-			self.timer.start()
-
-	def _show_menu(self, widget, button, time, data):
-		data.show_all()
-		data.popup(None, None, None, button, time)
-
 	def _set_icon(self):
 		if self.current_status == 0:
 			if self.output_area.pass_icon_state == "fail":
 				self.pass_icon.set_from_file(PASS_ICON)
 				self.pass_icon_state = "pass"
 
-			else: #already OK Icon
+			else: #aready OK Icon
 				pass
 
 		else:
@@ -236,13 +218,11 @@ class UserInterface(object):
 			else: #already OK icon
 				pass
 
-
 	def pause_timer(self, widget=None):
-		self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
-		self.timer.pause()
+		self.output_area.stop_timer()
 
 	def start_timer(self, widget=None):
-		self.timer.start()
+		self.output_area.start_timer()
 
 	def warn_time_is_up(self):
 		"""Shows a dialog warning the pilot that his time is up"""
@@ -283,6 +263,7 @@ class UserInterface(object):
 			)
 
 			self.output_area.timer_label.set_text(time_str)
+
 		else:
 			self.pause_timer()
 			self.warn_time_is_up()
