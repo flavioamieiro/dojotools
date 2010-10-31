@@ -31,7 +31,7 @@ from optparse import OptionParser
 import gtk
 import gobject
 
-from ui import UserInterface
+from dojotoolsUi import UserInterface
 
 class Timer(object):
 
