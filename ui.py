@@ -102,6 +102,18 @@ class UserInterface(object):
         dialog.run()
         dialog.destroy()
 
+
+    def html_escape(self, text):
+        """Produce entities within text."""		 
+        html_escape_table = {
+            "&": "&amp;",
+            '"': "&quot;",
+            "'": "&apos;",
+            ">": "&gt;",
+            "<": "&lt;",
+        }
+        return "".join(html_escape_table.get(c,c) for c in text)
+
     def show_command_results(self, status, output):
         """
         Shows the output to the users.
@@ -126,7 +138,7 @@ class UserInterface(object):
 
         if pynotify is not None:
             pynotify.init('dojotools')
-            message = pynotify.Notification('Dojotools', output)
+            message = pynotify.Notification('Dojotools', self.html_escape(output))
             message.attach_to_status_icon(self.status_icon)
             message.set_urgency(
                 pynotify.URGENCY_NORMAL if status == 0
