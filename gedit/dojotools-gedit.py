@@ -11,7 +11,7 @@ import gobject
 from dojotoolsUi import UserInterface
 from dojotools import Monitor, Timer
 
-
+DEFAULT_TIMER = 300
 
 class DojoToolsGeditHelper:
     def __init__(self, plugin, window):
@@ -46,12 +46,12 @@ class DojoToolsGedit(gedit.Plugin):
         try:
             timer = Timer(int(self.round_timer))
         except:
-            timer = Timer(300)
+            timer = Timer(DEFAULT_TIMER)
 
-        if self.ui == None:
-            self.ui = UserInterface(timer, window)
-        else:
+        if self.ui != None:
 	        self.ui.re_initialize(timer)
+        else:
+            self.ui = UserInterface(timer, window)
 
     def deactivate(self, window):
         self.ui.remove_output()
@@ -76,7 +76,16 @@ class DojoToolsGedit(gedit.Plugin):
             self.monitor.commands = self.commands
 
         #Refresh Ui
-        self.start_plugin()
+        try:
+            timer = Timer(int(self.round_timer))
+        except:
+            timer = Timer(DEFAULT_TIMER)
+
+        if self.ui != None:
+	        self.ui.re_initialize(timer)
+        else:
+            self.ui = UserInterface(timer, window)
+
 
         return True
 
