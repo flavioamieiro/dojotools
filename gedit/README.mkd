@@ -1,0 +1,12 @@
+Dojotools is intended to help in coding dojo sessions.
+
+Dojotools-gedit instalation:
+
+    Step 1: move all archives off the directory gedit/ to ~/.gnome2/gedit/plugins/.
+    Step 2: move the image dojotools-images/kimono.png to /usr/share/icons/gnome/32x32/actions/.
+    Step 3: open Gedit editor and the archive(s) to edit, press CTRL + F9.
+    Step 4: go to Edit - Preferences, tab Plug-ins, and activate the plugin Dojo Tools.
+    Step 5: for the plugin configuration, still in the same tab, go to 'Configure plug-in'.
+    Step 6: 'Commands to execute': command responsable for the tests run, like 'python ~/codigos/teste_JoKenPo.py', OK and Close.
+    Step 7: save the archive, then the tab 'Dojo Tools Output' will apear.
+    Step 8: just enjoy and have some fun. \o/
