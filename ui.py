@@ -67,8 +67,10 @@ class UserInterface(object):
 
         self.set_time_item = gtk.MenuItem('Alterar tempo')
         self.set_time_item.connect('activate', self.set_time)
-
-    
+        
+        self.reset_time_item = gtk.MenuItem('Resetar tempo')
+        self.reset_time_item.connect('activate', self.reset_time)
+        
         self.separator = gtk.MenuItem()
         
         if self.use_thread:
@@ -81,6 +83,7 @@ class UserInterface(object):
             self.menu.append(self.separator2)
         self.menu.append(self.timer_item)
         self.menu.append(self.set_time_item)
+        self.menu.append(self.reset_time_item)
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
         
@@ -108,7 +111,8 @@ class UserInterface(object):
         else:
             self.warn_set_time()
             
-          
+    def reset_time(self, widget=None):
+        self.timer.time_left = self.timer.round_time 
         
     def main_quit(self, arg, widget=None):
         if self.use_thread:
