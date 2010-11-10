@@ -61,11 +61,8 @@ class UserInterface(object):
     def _create_menu(self):
         self.menu = gtk.Menu()
 
-        self.pause_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
-        self.pause_item.connect('activate', self.pause_timer)
-
-        self.play_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PLAY)
-        self.play_item.connect('activate', self.start_timer)
+        self.timer_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
+        self.timer_item.connect('activate', self.timer_button)
 
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit_item.connect('activate', self.main_quit, gtk)
@@ -80,8 +77,7 @@ class UserInterface(object):
 
             self.menu.append(self.kill_item)
             self.menu.append(self.separator2)
-        self.menu.append(self.pause_item)
-        self.menu.append(self.play_item)
+        self.menu.append(self.timer_item)
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
         
@@ -107,13 +103,23 @@ class UserInterface(object):
         self.thread.stop()
 
 
-    def pause_timer(self, widget=None):
-        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
-        self.timer.pause()
+    def timer_button(self, widget=None):
+        if self.timer.running:
+            self.pause_timer()
+        else:
+            self.start_timer()
 
     def start_timer(self, widget=None):
         self._set_icon()
         self.timer.start()
+        self.timer_item.set_label("Pausar")
+    
+    def pause_timer(self, widget=None):
+        self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
+        self.timer.pause()
+        self.timer_item.set_label("Reproduzir")
+        
+    
 
     def warn_time_is_up(self):
         """Shows a dialog warning the pilot that his time is up"""
@@ -177,8 +183,10 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
+            self.timer_item.set_sensitive(False)
             self.pause_timer()
             self.warn_time_is_up()
+            self.timer_item.set_sensitive(True)
             self.start_timer()
-
+            
         return True
