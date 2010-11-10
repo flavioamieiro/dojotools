@@ -59,7 +59,7 @@ class RunThread (threading.Thread):
         """
         runs a command and waits for it to finish
         """
-        self.ui.kill_item.set_label("Matar "+self.__repr__())
+        self.ui.set_kill_label("Matar "+self.__repr__())
         self.process = subprocess.Popen(
             self.test_cmd,
             shell = True,
@@ -76,17 +76,19 @@ class RunThread (threading.Thread):
                 arduino.send_message(status)
         except:
             print 'Algum erro de comunicação com o Arduino ocorreu!'
-
-        self.ui.kill_item.set_label(u"Nenhum projeto em execução")
+        
+        self.ui.set_kill_label()
         self.stop()
         self.ui.show_command_results(status, output)
         return output
         
         
     def stop (self):
+        
         if not self.ui.kill_item.get_label() == u"Nenhum projeto em execução":
             self.ui.show_command_results(True, u"Execução interrompida")
-        self.ui.kill_item.set_label(u"Nenhum projeto em execução")
+        self.ui.set_kill_label()
+        
         try:
             self.process.stdout.close() 
             self.process.stderr.close() 

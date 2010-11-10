@@ -65,7 +65,7 @@ class UserInterface(object):
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit_item.connect('activate', self.main_quit, gtk)
 
-        self.set_time_item = gtk.MenuItem('Alterar tempo')
+        self.set_time_item = gtk.MenuItem('Alterar tempo (%d segs)' % (self.timer.round_time))
         self.set_time_item.connect('activate', self.set_time)
         
         self.reset_time_item = gtk.MenuItem('Resetar tempo')
@@ -95,10 +95,18 @@ class UserInterface(object):
         data.show_all()
         data.popup(None, None, None, button, time)
 
+    def _timer_items_set_sensitive(self, value):
+        self.timer_item.set_sensitive(value)
+        self.reset_time_item.set_sensitive(value)
+
     def _set_icon(self):
         self.status_icon.set_from_file(
             PASS_ICON if self.current_status == 0 else FAIL_ICON
         )
+        
+    def set_kill_label(self, label=u"Nenhum projeto em execução"):
+        self.kill_item.set_sensitive(not label == u"Nenhum projeto em execução")
+        self.kill_item.set_label(label)
         
     def set_time(self, widget=None):
         self.timer_item.set_sensitive(False)
@@ -164,6 +172,7 @@ class UserInterface(object):
         dialog.run()
         try:
             self.timer.round_time = int(entrada.get_text())
+            self.set_time_item.set_label('Alterar tempo (%d segs)' % (self.timer.round_time))
         except:
             pass
 
@@ -211,7 +220,7 @@ class UserInterface(object):
                 pynotify.URGENCY_NORMAL if status == 0
                 else pynotify.URGENCY_CRITICAL
             )
-            message.show()
+            message.show() 
 
     def update_timer(self):
         if self.timer.time_left:
@@ -221,10 +230,10 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
-            self.timer_item.set_sensitive(False)
             self.pause_timer()
+            self._timer_items_set_sensitive(False)
             self.warn_time_is_up()
-            self.timer_item.set_sensitive(True)
+            self._timer_items_set_sensitive(True)
             self.start_timer()
             
         return True
