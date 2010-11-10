@@ -41,14 +41,18 @@ __all__ = ['UserInterface']
 
 class UserInterface(object):
 
-    def __init__(self, timer):
+    def __init__(self, timer, use_thread):
         self.timer = timer
+        self.thread = None
+        self.use_thread = use_thread
         self.current_status = 0
 
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_file(PASS_ICON)
         self._create_menu()
         self.status_icon.set_visible(True)
+        
+        
 
         self.start_timer()
 
@@ -64,14 +68,24 @@ class UserInterface(object):
         self.play_item.connect('activate', self.start_timer)
 
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-        self.quit_item.connect('activate', gtk.main_quit, gtk)
+        self.quit_item.connect('activate', self.main_quit, gtk)
 
         self.separator = gtk.MenuItem()
+        
+        if self.use_thread:
+            self.separator2 = gtk.MenuItem()
+            
+            self.kill_item = gtk.MenuItem(u"Nenhum projeto em execução")
+            self.kill_item.connect('activate', self.kill_process)
 
+            self.menu.append(self.kill_item)
+            self.menu.append(self.separator2)
         self.menu.append(self.pause_item)
         self.menu.append(self.play_item)
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
+        
+
 
         self.status_icon.connect('popup-menu', self._show_menu, self.menu)
 
@@ -83,6 +97,15 @@ class UserInterface(object):
         self.status_icon.set_from_file(
             PASS_ICON if self.current_status == 0 else FAIL_ICON
         )
+        
+    def main_quit(self, arg, widget=None):
+        if self.use_thread:
+            self.thread.stop()
+        gtk.main_quit(arg)
+        
+    def kill_process(self, widget=None):
+        self.thread.stop()
+
 
     def pause_timer(self, widget=None):
         self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)

@@ -31,8 +31,80 @@ from optparse import OptionParser
 import gtk
 import gobject
 import arduino
-
+import threading
+import datetime
 from ui import UserInterface
+
+
+
+class RunThread (threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__ (self, test_cmd,  monitor):
+        super(RunThread, self).__init__()
+        self._stop = threading.Event()
+        self.test_cmd = test_cmd
+        self.directory = monitor.directory
+        self.arduino = monitor.arduino
+        self.ui = monitor.ui
+        self.start_time = '%02d:%02d:%02d' % (
+                (datetime.datetime.now().hour),
+                (datetime.datetime.now().minute),
+                (datetime.datetime.now().second),
+            )
+        self.process = None
+        
+    def run(self):
+        """
+        runs a command and waits for it to finish
+        """
+        self.ui.kill_item.set_label("Matar "+self.__repr__())
+        self.process = subprocess.Popen(
+            self.test_cmd,
+            shell = True,
+            cwd = self.directory,
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE,
+        )
+
+        output = self.process.stdout.read()
+        output += self.process.stderr.read()
+        status = self.process.wait()
+        try:
+            if self.arduino:
+                arduino.send_message(status)
+        except:
+            print 'Algum erro de comunicação com o Arduino ocorreu!'
+
+        self.ui.kill_item.set_label(u"Nenhum projeto em execução")
+        self.stop()
+        self.ui.show_command_results(status, output)
+        return output
+        
+        
+    def stop (self):
+        if not self.ui.kill_item.get_label() == u"Nenhum projeto em execução":
+            self.ui.show_command_results(True, u"Execução interrompida")
+        self.ui.kill_item.set_label(u"Nenhum projeto em execução")
+        try:
+            self.process.stdout.close() 
+            self.process.stderr.close() 
+            self.process.terminate()   
+              
+        except:
+            pass
+        
+
+        self._stop.set()
+        self._Thread__stop()
+        #
+
+    def stopped (self):
+        return self._stop.isSet()
+        
+    def __repr__(self):
+        return self.start_time+" - "+self.test_cmd.split()[-1]
 
 class Timer(object):
 
@@ -61,7 +133,7 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False):
+    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False, use_thread=False):
         """
         'directory' is the directory to be watched for changes.
 
@@ -81,6 +153,7 @@ class Monitor(object):
         self.ui = ui
         self.commit = commit
         self.arduino = arduino
+        self.use_thread = use_thread
 
         gobject.timeout_add(1000, self.check)
 
@@ -139,7 +212,25 @@ class Monitor(object):
 
     def run_command(self, test_cmd):
         """
-        As the name says, runs a command and waits for it to finish
+        As the name says, runs a command 
+        """
+        if self.use_thread:
+            self._run_by_thread(test_cmd)
+        else:
+            self._normal_run(test_cmd)
+
+        
+    def _run_by_thread(self, test_cmd):
+        """
+        Runs command in a thread without waiting for it to finish
+        """
+        thread = RunThread(test_cmd, self)
+        thread.start()
+        self.ui.thread = thread
+        
+    def _normal_run(self, test_cmd):
+        """
+        Runs a command and waits for it to finish"
         """
         process = subprocess.Popen(
             test_cmd,
@@ -157,9 +248,8 @@ class Monitor(object):
                 arduino.send_message(status)
         except:
             print 'Algum erro de comunicação com o Arduino ocorreu!'
-
-        self.ui.show_command_results(status, output)
-
+        self.ui.show_command_results(status, output)    
+        
     def check(self):
         """
         Monitor self.directory for changes, ignoring files matching any item
@@ -257,6 +347,17 @@ def parse_options():
         ),
         default = False,
     )
+    
+    parser.add_option(
+        '-m',
+        '--multithread',
+        action = 'store_true',
+        dest = 'use_thread',
+        help = (
+            'If this flag is used the program will run in a thread'
+        ),
+        default = False,
+    )
     return parser.parse_args()
 
 
@@ -276,7 +377,7 @@ if __name__ == '__main__':
         print 'press ^C to quit'
 
         timer = Timer(options.round_time)
-        ui = UserInterface(timer)
+        ui = UserInterface(timer, options.use_thread)
         monitor = Monitor(
             ui = ui,
             directory = options.directory,
@@ -284,10 +385,13 @@ if __name__ == '__main__':
             patterns_file = options.patterns_file,
             commit = options.commit,
             arduino = options.arduino,
+            use_thread = options.use_thread,
         )
 
         gtk.main()
 
     except KeyboardInterrupt:
         print '\nleaving...'
+        if options.use_thread:
+            ui.thread.stop()
         sys.exit(0)
