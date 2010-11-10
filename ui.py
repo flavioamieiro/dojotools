@@ -38,7 +38,7 @@ PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
 FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
 
 __all__ = ['UserInterface']
-
+        
 class UserInterface(object):
 
     def __init__(self, timer, use_thread):
@@ -52,8 +52,6 @@ class UserInterface(object):
         self._create_menu()
         self.status_icon.set_visible(True)
         
-        
-
         self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
@@ -67,6 +65,10 @@ class UserInterface(object):
         self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         self.quit_item.connect('activate', self.main_quit, gtk)
 
+        self.set_time_item = gtk.MenuItem('Alterar tempo')
+        self.set_time_item.connect('activate', self.set_time)
+
+    
         self.separator = gtk.MenuItem()
         
         if self.use_thread:
@@ -78,6 +80,7 @@ class UserInterface(object):
             self.menu.append(self.kill_item)
             self.menu.append(self.separator2)
         self.menu.append(self.timer_item)
+        self.menu.append(self.set_time_item)
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
         
@@ -94,6 +97,19 @@ class UserInterface(object):
             PASS_ICON if self.current_status == 0 else FAIL_ICON
         )
         
+    def set_time(self, widget=None):
+        self.timer_item.set_sensitive(False)
+        
+        if self.timer.running:
+            self.pause_timer()
+            self.warn_set_time()
+            self.timer_item.set_sensitive(True)
+            self.start_timer()
+        else:
+            self.warn_set_time()
+            
+          
+        
     def main_quit(self, arg, widget=None):
         if self.use_thread:
             self.thread.stop()
@@ -104,10 +120,8 @@ class UserInterface(object):
 
 
     def timer_button(self, widget=None):
-        if self.timer.running:
-            self.pause_timer()
-        else:
-            self.start_timer()
+        self.pause_timer() if self.timer.running else self.start_timer()
+
 
     def start_timer(self, widget=None):
         self._set_icon()
@@ -130,7 +144,27 @@ class UserInterface(object):
         dialog.show_all()
         dialog.run()
         dialog.destroy()
+        
+    def warn_set_time(self):
+        """Shows a dialog warning the pilot that his time is up"""
+        dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
+  
+        dialog.set_default_size(180, 120)
+        dialog.set_keep_above(True)
+        dialog.vbox.pack_start(gtk.Label('Escolha o tempo (em segundos)!'))
+        entrada = gtk.Entry(15)
+        
+        entrada.set_text(str(self.timer.round_time))
+        dialog.vbox.add(entrada)
+        dialog.show_all()
+        dialog.run()
+        try:
+            self.timer.round_time = int(entrada.get_text())
+        except:
+            pass
 
+        dialog.destroy()
+        
 
     def html_escape(self, text):
         """Produce entities within text."""		 
