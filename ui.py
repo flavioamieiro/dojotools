@@ -24,13 +24,15 @@ import os
 import sys
 import gtk
 import gobject
+import lang
 
 try:
     import pynotify
 except ImportError:
     pynotify = None
-    sys.stderr.write('\n\n*** Could not import pynotify. '
-        'Make sure it is installed so you can see the notifications ***\n\n\n')
+    sys.stderr.write(lang.PYNOTIFY_IMPORT_ERROR1+
+                     lang.PYNOTIFY_IMPORT_ERROR2
+    )
 
 
 IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
@@ -43,9 +45,10 @@ class UserInterface(object):
 
     def __init__(self, timer, use_thread):
         self.timer = timer
+        self.current_status = 0
+        
         self.thread = None
         self.use_thread = use_thread
-        self.current_status = 0
 
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_file(PASS_ICON)
@@ -56,61 +59,64 @@ class UserInterface(object):
 
         gobject.timeout_add(1000, self.update_timer)
 
+    def _timer_items_set_sensitive(self, value):
+        self.timer_item.set_sensitive(value)
+        self.reset_time_item.set_sensitive(value)
+
     def _create_menu(self):
         self.menu = gtk.Menu()
-
-        self.timer_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
-        self.timer_item.connect('activate', self.timer_button)
-
-        self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-        self.quit_item.connect('activate', self.main_quit, gtk)
-
-        self.set_time_item = gtk.MenuItem('Alterar tempo (%d segs)' % (self.timer.round_time))
-        self.set_time_item.connect('activate', self.set_time)
-        
-        self.reset_time_item = gtk.MenuItem('Resetar tempo')
-        self.reset_time_item.connect('activate', self.reset_time)
-        
-        self.separator = gtk.MenuItem()
         
         if self.use_thread:
             self.separator2 = gtk.MenuItem()
             
-            self.kill_item = gtk.MenuItem(u"Nenhum projeto em execução")
+            self.kill_item = gtk.MenuItem(lang.NO_RUNNING)
             self.kill_item.connect('activate', self.kill_process)
 
             self.menu.append(self.kill_item)
             self.menu.append(self.separator2)
+
+        self.timer_item = gtk.ImageMenuItem(gtk.STOCK_MEDIA_PAUSE)
+        self.timer_item.connect('activate', self.timer_button)
+
+        self.set_time_item = gtk.MenuItem(
+            lang.SET_TIME % (self.timer.round_time)
+        )
+        self.set_time_item.connect('activate', self.set_time)
+        
+        self.reset_time_item = gtk.MenuItem(lang.RESET_TIME)
+        self.reset_time_item.connect('activate', self.reset_time)
+        
+        self.separator = gtk.MenuItem()
+        
+        self.quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+        self.quit_item.connect('activate', self.main_quit, gtk)
+            
         self.menu.append(self.timer_item)
         self.menu.append(self.set_time_item)
         self.menu.append(self.reset_time_item)
         self.menu.append(self.separator)
         self.menu.append(self.quit_item)
         
-
-
         self.status_icon.connect('popup-menu', self._show_menu, self.menu)
 
     def _show_menu(self, widget, button, time, data):
         data.show_all()
         data.popup(None, None, None, button, time)
 
-    def _timer_items_set_sensitive(self, value):
-        self.timer_item.set_sensitive(value)
-        self.reset_time_item.set_sensitive(value)
-
+   
     def _set_icon(self):
         self.status_icon.set_from_file(
             PASS_ICON if self.current_status == 0 else FAIL_ICON
         )
         
-    def set_kill_label(self, label=u"Nenhum projeto em execução"):
-        self.kill_item.set_sensitive(not label == u"Nenhum projeto em execução")
+    def set_kill_label(self, label=lang.NO_RUNNING):
+        """Change kill_item label"""
+        self.kill_item.set_sensitive(not label == lang.NO_RUNNING)
         self.kill_item.set_label(label)
         
     def set_time(self, widget=None):
+        """Shows dialog to set time"""
         self.timer_item.set_sensitive(False)
-        
         if self.timer.running:
             self.pause_timer()
             self.warn_set_time()
@@ -128,56 +134,62 @@ class UserInterface(object):
         gtk.main_quit(arg)
         
     def kill_process(self, widget=None):
+        """Stop thread"""
         self.thread.stop()
 
-
     def timer_button(self, widget=None):
+        """Pause or start timer"""
         self.pause_timer() if self.timer.running else self.start_timer()
 
-
     def start_timer(self, widget=None):
+        """
+        Change icon to started, start timer and 
+        Change timer_item label to lang.PAUSE
+        """
         self._set_icon()
         self.timer.start()
-        self.timer_item.set_label("Pausar")
+        self.timer_item.set_label(lang.PAUSE)
     
     def pause_timer(self, widget=None):
+        """
+        Change icon to paused, pause timer and 
+        Change timer_item label to lang.START
+        """
         self.status_icon.set_from_stock(gtk.STOCK_MEDIA_PAUSE)
         self.timer.pause()
-        self.timer_item.set_label("Reproduzir")
-        
-    
+        self.timer_item.set_label(lang.START)
+          
+    def warn(self, widgets, result_index=-1):
+        """
+        Shows a dilog with widgets from a list 
+        Returns the get_text of result_index item from widgets list
+        """
+        dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
+        dialog.set_default_size(180, 120)
+        dialog.set_keep_above(True)
+        for widget in widgets:
+            dialog.vbox.add(widget)
+        dialog.show_all()
+        dialog.run()
+        result = widgets[result_index].get_text() if not result_index == -1 else None
+        dialog.destroy()
+        return result
 
     def warn_time_is_up(self):
         """Shows a dialog warning the pilot that his time is up"""
-        dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
-        dialog.set_default_size(180, 120)
-        dialog.set_keep_above(True)
-        dialog.vbox.pack_start(gtk.Label('Your time is up!'))
-        dialog.show_all()
-        dialog.run()
-        dialog.destroy()
+        self.warn([gtk.Label(lang.TIME_IS_UP)])
         
     def warn_set_time(self):
-        """Shows a dialog warning the pilot that his time is up"""
-        dialog = gtk.Dialog('Dojotools', buttons=(gtk.STOCK_OK, 0))
-  
-        dialog.set_default_size(180, 120)
-        dialog.set_keep_above(True)
-        dialog.vbox.pack_start(gtk.Label('Escolha o tempo (em segundos)!'))
-        entrada = gtk.Entry(15)
-        
-        entrada.set_text(str(self.timer.round_time))
-        dialog.vbox.add(entrada)
-        dialog.show_all()
-        dialog.run()
+        """Shows a dialog to change round time"""   
         try:
-            self.timer.round_time = int(entrada.get_text())
-            self.set_time_item.set_label('Alterar tempo (%d segs)' % (self.timer.round_time))
-        except:
-            pass
-
-        dialog.destroy()
-        
+            text_input = gtk.Entry(15)
+            text_input.set_text(str(self.timer.round_time))
+            
+            time_text = self.warn([gtk.Label(lang.WRITE_TIME), text_input], result_index = 1)
+            self.timer.round_time = int(time_text)
+            self.set_time_item.set_label(lang.SET_TIME % (self.timer.round_time))
+        except ValueError:
+            self.warn([gtk.Label(lang.VALUE_ERROR)])
 
     def html_escape(self, text):
         """Produce entities within text."""		 
