@@ -36,7 +36,9 @@ PATTERNS_HELP = 'Defines the file with patterns to ignore. '
 TIME_HELP = 'Define the time of each round'
 ARDUINO_HELP = 'If this flag is used an interface with Arduino will be used'
 MULTITHREAD_HELP = 'If this flag is used the program will run in a thread'
-
+BEFORE_HELP = ('Run this command before running tests.'
+               'WARNING: It will not run in thread, so be careful with your commands'
+)
 MONITORING = 'Monitoring files in %s'
 IGNORING = 'ignoring files in %s'
 QUIT = 'press ^C to quit'

@@ -136,7 +136,7 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False, use_thread=False):
+    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False, use_thread=False, before=""):
         """
         'directory' is the directory to be watched for changes.
 
@@ -157,6 +157,7 @@ class Monitor(object):
         self.commit = commit
         self.arduino = arduino
         self.use_thread = use_thread
+        self.before = before
 
         gobject.timeout_add(1000, self.check)
 
@@ -213,10 +214,16 @@ class Monitor(object):
                     lang.GIT_ERROR2)
             raise OSError(error)
 
+
+
+
     def run_command(self, test_cmd):
         """
         As the name says, runs a command 
         """
+        if self.before:
+            self._normal_run(self.before, before_command=True)
+            
         if self.use_thread:
             self._run_by_thread(test_cmd)
         else:
@@ -231,7 +238,7 @@ class Monitor(object):
         thread.start()
         self.ui.thread = thread
         
-    def _normal_run(self, test_cmd):
+    def _normal_run(self, test_cmd, before_command=False):
         """
         Runs a command and waits for it to finish"
         """
@@ -251,7 +258,10 @@ class Monitor(object):
                 arduino.send_message(status)
         except:
             print lang.ARDUINO_ERROR
-        self.ui.show_command_results(status, output)    
+        if not before_command:
+            self.ui.show_command_results(status, output)
+        else:
+            sys.stdout.write(output)
         
     def check(self):
         """
@@ -347,6 +357,16 @@ def parse_options():
         help = lang.MULTITHREAD_HELP,
         default = False,
     )
+    
+    parser.add_option(
+        '-b',
+        '--before',
+        action = 'store',
+        type = 'string',
+        dest = 'before_command',
+        help = lang.BEFORE_HELP,
+        default = ""
+    )
     return parser.parse_args()
 
 
@@ -375,6 +395,7 @@ if __name__ == '__main__':
             commit = options.commit,
             arduino = options.arduino,
             use_thread = options.use_thread,
+            before = options.before_command,
         )
 
         gtk.main()
