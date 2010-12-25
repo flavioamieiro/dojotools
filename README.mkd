@@ -12,38 +12,26 @@ Our *huge* feature list is:
 The only dependency is pygtk (to create the status icon), but if
 you want notifications, you should also have pynotify installed.
 
-Notifications, however, will not work very well in Ubuntu, since
-Canonical’s Notify-OSD does not behave the same way as libnotify
-does in other linux distributions.
+Notifications, will not work very well in Ubuntu, since Canonical’s
+Notify-OSD does not behave the same way as libnotify does in other
+linux distributions.
 
 You can revert to the old notification-daemon following instructions
 in [this Ubuntu forums post][1] by [gradinaruvasile][2]:
 
-> 1. Install the notification-daemon package:
->
->         sudo apt-get install notification-daemon
->
-> 2. Rename the /usr/lib/notify-osd/notify-osd executable
->
->         sudo mv /usr/lib/notify-osd/notify-osd /usr/lib/notify-osd/notify-osd-original
->
-> 3. Create a symbolic link:
->
->         sudo ln -s /usr/lib/notification-daemon/notification-daemon /usr/lib/notify-osd/notify-osd
->
-> 4. Kill the original notification:
->
->         sudo killall notify-osd
->
-> 5. Launch the new notification - press alt+F2, type /usr/lib/notify-osd/notify-osd
->
-> 6. Test:
->
->         notify-send test test
-
-
 We still need notifications for other platforms.
 
+Another optional dependency is [python-firmata][python-firmata] if you
+want to use an Arduino to show the status of your tests using a [real,
+physical semaphore][semaphore].
+
+If you want to do so, install [python-firmata][python-firmata], upload the firmata
+sketch to your Arduino, and leave it connected to your usb port.
+
+Because of the way we initiate the communication with the Arduino,
+this will probably not work on Windows for now.
 
 [1]: http://www.ubuntuforums.org/showthread.php?p=7658286#post7658286
 [2]: http://www.ubuntuforums.org/member.php?u=589640
+[python-firmata]: https://github.com/lupeke/python-firmata
+[semaphore]: http://blog.justen.eng.br/2010/10/semaforo-do-coding-dojo-rio.html

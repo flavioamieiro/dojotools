@@ -196,6 +196,16 @@ def parse_options():
     """.replace('  ', '')
     parser = OptionParser(usage, description=description)
     parser.add_option(
+        '-a',
+        '--arduino',
+        action='store_true',
+        dest = 'arduino',
+        help = (
+            'uses an arduino as a visual output'
+        ),
+        default = False,
+    )
+    parser.add_option(
         '-c',
         '--commit',
         action='store_true',
@@ -258,7 +268,13 @@ if __name__ == '__main__':
         print 'press ^C to quit'
 
         timer = Timer(options.round_time)
-        ui = UserInterface(timer)
+
+        if options.arduino:
+            from arduino_ui import ArduinoUi
+            ui = ArduinoUi()
+        else:
+            ui = UserInterface(timer)
+
         monitor = Monitor(
             ui = ui,
             directory = options.directory,
