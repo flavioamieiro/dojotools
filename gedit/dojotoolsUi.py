@@ -37,6 +37,62 @@ KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono.png')
 
 __all__ = ['UserInterface']
 
+def enter_callback_ui(*args):
+    self.commands = entry_commands.get_text()
+    self.round_timer = entry_timer.get_text()
+    self.configure_dialog.hide()
+
+    #Refresh monitor commands
+    if self.has_monitor():
+        self.monitor.commands = self.commands
+
+    #Refresh Ui
+    try:
+        timer = Timer(int(self.round_timer))
+    except:
+        timer = Timer(DEFAULT_TIMER)
+
+    if self.ui != None:
+        self.ui.re_initialize(timer)
+    else:
+        self.ui = UserInterface(timer, window)
+
+    return True
+
+
+def window_configure_dialog(*args):
+    self.configure_dialog = gtk.Dialog('Dojotools configuration')
+    self.configure_dialog.set_default_size(300, 100)
+
+    #entry comands - use text default ?
+    entry_commands = gtk.Entry()
+    if not self.has_commands():
+        entry_commands.set_text("Commands to execute")
+    else:
+        entry_commands.set_text(self.commands)
+
+    #entry_timer - use text default ?
+    entry_timer = gtk.Entry()
+    if not self.has_round_timer():
+        entry_timer.set_text("Time in seconds, default is 300")
+    else:
+        entry_timer.set_text(self.round_timer)
+
+    #Gabriel se metendo aqui e botando um botao de OK para ativar as coisas
+    ok_button_box = gtk.HBox(False,0)
+    ok_button = gtk.Button('OK')
+    ok_button.connect("clicked", self.enter_callback, entry_commands, entry_timer)
+    ok_button_box.pack_start(ok_button)
+    ok_button_align = gtk.Alignment(0.5,0,0,0)
+    ok_button_align.add(ok_button_box)
+
+    self.configure_dialog.vbox.pack_start(entry_commands, True, True, 0)
+    self.configure_dialog.vbox.pack_start(entry_timer, True, True, 0)
+    self.configure_dialog.vbox.pack_start(ok_button_align, True, True, 0)
+    self.configure_dialog.show_all()
+
+    return self.configure_dialog
+
 class OutputArea(gtk.VBox):
 	"""
 	Criado por gabriel.pa.oliveira@gmail.com para direcionar o output do dojotools para o bottom panel
