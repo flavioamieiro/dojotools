@@ -27,11 +27,9 @@ import sys
 from fnmatch import fnmatch
 import subprocess
 from time import ctime
-from optparse import OptionParser
-import gtk
 import gobject
 
-from ui import UserInterface
+from dojotoolsUi import UserInterface
 
 class Timer(object):
 
@@ -139,6 +137,7 @@ class Monitor(object):
         """
         As the name says, runs a command and waits for it to finish
         """
+        test_cmd = self.commands
         process = subprocess.Popen(
             test_cmd,
             shell = True,
@@ -173,7 +172,6 @@ class Monitor(object):
             m_time_list += [
                 os.stat(os.path.join(root, f)).st_mtime for f in files
             ]
-
         new_sum = sum(m_time_list)
         if new_sum != self.old_sum:
             for command in self.commands:
@@ -186,89 +184,3 @@ class Monitor(object):
         return True
 
 
-def parse_options():
-    usage = "%prog [OPTIONS] COMMAND ..."
-    description = """
-        %prog watches a directory for changes. As soon as there are any changes
-        to the files being watched, it runs the commands specified as positional
-        arguments. You can specify as many commands as you wish, but don't forget
-        to use quotes if you command has spaces in it.
-    """.replace('  ', '')
-    parser = OptionParser(usage, description=description)
-    parser.add_option(
-        '-c',
-        '--commit',
-        action='store_true',
-        dest = 'commit',
-        help = (
-            'if this flag is used, a git commit will '
-            'be issued whenever the files change'
-        ),
-        default = False,
-    )
-    parser.add_option(
-        '-d',
-        '--directory',
-        action = 'store',
-        type = 'string',
-        dest = 'directory',
-        help = 'Watch DIRECTORY',
-        metavar = 'DIRECTORY',
-        default = os.path.abspath(os.path.curdir)
-    )
-
-    parser.add_option(
-        '-p',
-        '--patterns_file',
-        action = 'store',
-        type = 'string',
-        dest = 'patterns_file',
-        help = (
-            'Defines the file with patterns to ignore. '
-        ),
-        metavar = 'PATTERNS_FILE',
-        default = None,
-    )
-
-    parser.add_option(
-        '-t',
-        '--time',
-        action = 'store',
-        type = 'int',
-        dest = 'round_time',
-        help = 'Define the time of each round',
-        default = 300
-    )
-    return parser.parse_args()
-
-
-if __name__ == '__main__':
-
-    options, args = parse_options()
-
-    if options.patterns_file == None:
-        options.patterns_file = os.path.join(
-            options.directory,
-            '.dojoignore'
-        )
-
-    try:
-        print 'Monitoring files in %s' % options.directory
-        print 'ignoring files in %s' % (options.patterns_file)
-        print 'press ^C to quit'
-
-        timer = Timer(options.round_time)
-        ui = UserInterface(timer)
-        monitor = Monitor(
-            ui = ui,
-            directory = options.directory,
-            commands = args,
-            patterns_file = options.patterns_file,
-            commit = options.commit,
-        )
-
-        gtk.main()
-
-    except KeyboardInterrupt:
-        print '\nleaving...'
-        sys.exit(0)
