@@ -69,7 +69,7 @@ class DojoToolsGedit(gedit.Plugin):
         return True
 
     def enter_callback(self, widget, entry_commands, entry_timer):
-        return enter_callback_ui(self, widget, entry_commands, entry_timer)
+        return enter_callback_ui(self, widget, entry_commands, entry_timer, DEFAULT_TIMER)
 
     def create_configure_dialog(self):
         return window_configure_dialog(self)

@@ -29,8 +29,6 @@ import subprocess
 from time import ctime
 import gobject
 
-from dojotoolsUi import UserInterface
-
 class Timer(object):
 
     def __init__(self, round_time=300):
