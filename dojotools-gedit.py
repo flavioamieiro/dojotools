@@ -56,7 +56,8 @@ class DojoToolsGedit(gedit.Plugin):
             self.ui = UserInterface(timer, window)
 
     def deactivate(self, window):
-        self.ui.remove_output()
+        if self.ui is not None:
+            self.ui.remove_output()
         self._instances[window].deactivate()
         del self._instances[window]
 
