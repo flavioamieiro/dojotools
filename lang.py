@@ -5,6 +5,12 @@ NO_RUNNING = u"Nenhum projeto em execução"
 PAUSE = 'Pausar'
 START = 'Reproduzir'
 TIME_IS_UP = 'Your time is up!'
+TIME_IS_UP_UNSTOPPABLE = ('Your time is up!\n'
+                          '\n'
+                          'Copilot, \n'
+                          'time won''t stop and wait for you!\n'
+                          'RUN!'
+)
 WRITE_TIME = 'Escolha o tempo (em segundos)!'
 VALUE_ERROR = u"Caracter inválido. Suas alterações não foram salvas"
 
@@ -39,6 +45,8 @@ MULTITHREAD_HELP = 'If this flag is used the program will run in a thread'
 BEFORE_HELP = ('Run this command before running tests.'
                'WARNING: It will not run in thread, so be careful with your commands'
 )
+UNSTOPPABLE_HELP = ("if this flag is used, the time won't stop after the end of a round")
+
 MONITORING = 'Monitoring files in %s'
 IGNORING = 'ignoring files in %s'
 QUIT = 'press ^C to quit'

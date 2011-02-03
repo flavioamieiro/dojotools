@@ -158,7 +158,7 @@ class Monitor(object):
         self.arduino = arduino
         self.use_thread = use_thread
         self.before = before
-
+     
         gobject.timeout_add(1000, self.check)
 
     def _get_patterns(self, patterns_file):
@@ -367,6 +367,15 @@ def parse_options():
         help = lang.BEFORE_HELP,
         default = ""
     )
+
+    parser.add_option(
+        '-u',
+        '--unstoppable',
+        action = 'store_true',
+        dest = 'unstoppable',
+        help = lang.UNSTOPPABLE_HELP,
+        default = False
+    )
     return parser.parse_args()
 
 
@@ -386,7 +395,7 @@ if __name__ == '__main__':
         print lang.QUIT
 
         timer = Timer(options.round_time)
-        ui = UserInterface(timer, options.use_thread)
+        ui = UserInterface(timer, options.use_thread, options.unstoppable)
         monitor = Monitor(
             ui = ui,
             directory = options.directory,

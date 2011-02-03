@@ -43,7 +43,7 @@ __all__ = ['UserInterface']
         
 class UserInterface(object):
 
-    def __init__(self, timer, use_thread):
+    def __init__(self, timer, use_thread, unstoppable):
         self.timer = timer
         self.current_status = 0
         
@@ -54,6 +54,7 @@ class UserInterface(object):
         self.status_icon.set_from_file(PASS_ICON)
         self._create_menu()
         self.status_icon.set_visible(True)
+        self.unstoppable = unstoppable
         
         self.start_timer()
 
@@ -175,9 +176,9 @@ class UserInterface(object):
         dialog.destroy()
         return result
 
-    def warn_time_is_up(self):
+    def warn_time_is_up(self, message):
         """Shows a dialog warning the pilot that his time is up"""
-        self.warn([gtk.Label(lang.TIME_IS_UP)])
+        self.warn([gtk.Label(message)])
         
     def warn_set_time(self):
         """Shows a dialog to change round time"""   
@@ -242,10 +243,12 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
-            self.pause_timer()
-            self._timer_items_set_sensitive(False)
-            self.warn_time_is_up()
-            self._timer_items_set_sensitive(True)
-            self.start_timer()
-            
+            if not self.unstoppable:
+                self.pause_timer()
+                self._timer_items_set_sensitive(False)
+                self.warn_time_is_up(lang.TIME_IS_UP)
+                self._timer_items_set_sensitive(True)
+                self.start_timer()
+            else:
+                self.warn_time_is_up(lang.TIME_IS_UP_UNSTOPPABLE)
         return True
