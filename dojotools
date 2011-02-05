@@ -420,11 +420,12 @@ if __name__ == '__main__':
                         commands = [
                             "mkdir %s" %(folder_name),
                             "cd %s" %(folder_name),
-                            "cp %s* %s" %(generator_path, folder_path),
-                            "rename 's/#\*dojotools\*#/%s/' *.*" %(problem_name),
-                            "rename 's/#\*up_dojotools\*#/%s/' *.*" %(problem_name.capitalize()),
-                            'sed -i "s/#\*dojotools\*#/%s/g" *.*' %(problem_name),
-                            'sed -i "s/#\*up_dojotools\*#/%s/g" *.*' %(problem_name.capitalize()),
+                            "cp -ar %s* %s" %(generator_path, folder_path),
+                            "cp -ar %s.??* %s" %(generator_path, folder_path),
+                            "rename 's/#\*dojotools\*#/%s/' *" %(problem_name),
+                            "rename 's/#\*up_dojotools\*#/%s/' *" %(problem_name.capitalize()),
+                            'sed -i "s/#\*dojotools\*#/%s/g" *' %(problem_name),
+                            'sed -i "s/#\*up_dojotools\*#/%s/g" *' %(problem_name.capitalize()),
                         ]
 
                         run_command = "; ".join(commands)
