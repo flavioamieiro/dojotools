@@ -46,9 +46,21 @@ BEFORE_HELP = ('Run this command before running tests.'
                'WARNING: It will not run in thread, so be careful with your commands'
 )
 UNSTOPPABLE_HELP = ("if this flag is used, the time won't stop after the end of a round")
+GENERATE_HELP = ("generate a folder with files for coding dojo. "
+                 "GENERATE: '(language) (problem) (modifiers)'"
+)
+
+GENERATOR_ERROR = 'Generator failed to generate files'
+
+RUN_FILE_WARNING = "Dojotools couldn't find run.dojo. Now it's just a timer!" 
 
 MONITORING = 'Monitoring files in %s'
 IGNORING = 'ignoring files in %s'
 QUIT = 'press ^C to quit'
 
 LEAVING = '\nleaving...'
+
+GENERATING_MESSAGE = "Generating Folder..."
+LANGUAGE_FOUND = "Language found: %s"
+LANGUAGE_GENERATOR_ERROR = "%s generator wasn't found"
+DOJO_PATH_EXISTS_ERROR = "Dojo path already exists! Dojotools will try to run this code!"

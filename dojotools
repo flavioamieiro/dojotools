@@ -83,8 +83,7 @@ class RunThread (threading.Thread):
         self.stop()
         self.ui.show_command_results(status, output)
         return output
-        
-        
+                
     def stop (self):
         """Stop thread and terminate running command"""
         if not self.ui.kill_item.get_label() == lang.NO_RUNNING:
@@ -101,7 +100,6 @@ class RunThread (threading.Thread):
         
         self._stop.set()
         self._Thread__stop()
-
 
     def stopped (self):
         return self._stop.isSet()
@@ -214,9 +212,6 @@ class Monitor(object):
                     lang.GIT_ERROR2)
             raise OSError(error)
 
-
-
-
     def run_command(self, test_cmd):
         """
         As the name says, runs a command 
@@ -228,7 +223,6 @@ class Monitor(object):
             self._run_by_thread(test_cmd)
         else:
             self._normal_run(test_cmd)
-
         
     def _run_by_thread(self, test_cmd):
         """
@@ -295,7 +289,6 @@ class Monitor(object):
         # This method must return True so gobject.timeout_add runs it again
         return True
 
-
 def parse_options():
     usage = "%prog [OPTIONS] COMMAND ..."
     description = lang.DESCRIPTION
@@ -308,6 +301,7 @@ def parse_options():
         help = lang.GIT_HELP,
         default = False,
     )
+    
     parser.add_option(
         '-d',
         '--directory',
@@ -376,6 +370,17 @@ def parse_options():
         help = lang.UNSTOPPABLE_HELP,
         default = False
     )
+
+    parser.add_option(
+        '-g',
+        '--generate',
+        action = 'store',
+        type = 'string',
+        dest = 'generate',
+        help = lang.GENERATE_HELP,
+        default = ""
+    )
+    
     return parser.parse_args()
 
 
@@ -383,16 +388,69 @@ if __name__ == '__main__':
 
     options, args = parse_options()
 
-    if options.patterns_file == None:
-        options.patterns_file = os.path.join(
-            options.directory,
-            '.dojoignore'
-        )
-
     try:
         print lang.MONITORING % options.directory
         print lang.IGNORING % (options.patterns_file)
         print lang.QUIT
+
+        if options.generate:
+            opts = options.generate.split(" ")
+            if len(opts) < 2:
+                print lang.GENERATOR_ERROR
+            else:
+                language = opts.pop(0)
+                problem_name = opts.pop(0)
+                extra_name = "_".join(opts)
+                if extra_name:
+                    extra_name = "_" + extra_name
+                today = datetime.datetime.today().strftime("%Y%m%d")
+
+                join = lambda a, b: os.path.join(os.path.abspath(a), b)
+    
+                folder_name = "%s%s_%s_%s" %(today, extra_name, language, problem_name)
+                
+                folder_path = join(os.path.curdir, folder_name)
+                generator_path = join(os.path.dirname(__file__), "generators/%s/" %(language))
+
+                if not os.path.exists(folder_path):
+                    print lang.GENERATING_MESSAGE
+
+                    if os.path.exists(generator_path):
+                        print lang.LANGUAGE_FOUND %(language)
+                        commands = [
+                            "mkdir %s" %(folder_name),
+                            "cd %s" %(folder_name),
+                            "cp %s* %s" %(generator_path, folder_path),
+                            "rename 's/#\*dojotools\*#/%s/' *.*" %(problem_name),
+                            "rename 's/#\*up_dojotools\*#/%s/' *.*" %(problem_name.capitalize()),
+                            'sed -i "s/#\*dojotools\*#/%s/g" *.*' %(problem_name),
+                            'sed -i "s/#\*up_dojotools\*#/%s/g" *.*' %(problem_name.capitalize()),
+                        ]
+
+                        run_command = "; ".join(commands)
+            
+                        os.popen(run_command)
+                    else:
+                        print lang.LANGUAGE_GENERATOR_ERROR %(language)
+                else:
+                    print lang.DOJO_PATH_EXISTS_ERROR
+
+                if options.directory == os.path.abspath(os.path.curdir):
+                    options.directory = folder_path
+
+        if options.patterns_file == None:
+            options.patterns_file = os.path.join(
+                options.directory,
+                '.dojoignore'
+            )
+
+        run_dojo_path = os.path.join(os.path.abspath(options.directory), 'run.dojo')
+        if not args:
+            if os.path.exists(run_dojo_path):
+                with open(run_dojo_path) as f:
+                    args = [f.read()]
+            else:
+                print lang.RUN_FILE_WARNING                
 
         timer = Timer(options.round_time)
         ui = UserInterface(timer, options.use_thread, options.unstoppable)

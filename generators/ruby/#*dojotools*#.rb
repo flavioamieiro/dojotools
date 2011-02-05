@@ -1,0 +1,3 @@
+def #*dojotools*# 
+  nil
+end
