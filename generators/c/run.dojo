@@ -1,0 +1,1 @@
+gcc test_#*dojotools*#.c -o test_#*dojotools*#.test && ./test_#*dojotools*#.test

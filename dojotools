@@ -424,8 +424,8 @@ if __name__ == '__main__':
                             "cp -ar %s.??* %s" %(generator_path, folder_path),
                             "rename 's/#\*dojotools\*#/%s/' *" %(problem_name),
                             "rename 's/#\*up_dojotools\*#/%s/' *" %(problem_name.capitalize()),
-                            'sed -i "s/#\*dojotools\*#/%s/g" *' %(problem_name),
-                            'sed -i "s/#\*up_dojotools\*#/%s/g" *' %(problem_name.capitalize()),
+                            'find . -type f -exec sed -i "s/#\*dojotools\*#/%s/g" {} ";"' %(problem_name),
+                            'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(problem_name.capitalize()),
                         ]
 
                         run_command = "; ".join(commands)
