@@ -172,8 +172,7 @@ class Monitor(object):
             ]
         new_sum = sum(m_time_list)
         if new_sum != self.old_sum:
-            for command in self.commands:
-                self.run_command(command)
+            self.run_command(self.commands)
             if self.commit:
                 self.git_commit_all()
             self.old_sum = new_sum
