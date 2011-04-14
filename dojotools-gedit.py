@@ -19,12 +19,10 @@ class DojoToolsGeditHelper:
     def __init__(self, plugin, window):
         self._window = window
         self._plugin = plugin
-        print 'Plugin Dojo-tools initialized'
 
     def deactivate(self):
         self._window = None
         self._plugin = None
-        print 'Plugin Dojo-tools deactivated'
 
     def update_ui(self):
         # Called whenever the window has been updated (active tab
@@ -58,6 +56,7 @@ class DojoToolsGedit(gedit.Plugin):
     def deactivate(self, window):
         if self.ui is not None:
             self.ui.remove_output()
+        self.ui.timer.pause()
         self._instances[window].deactivate()
         del self._instances[window]
 
