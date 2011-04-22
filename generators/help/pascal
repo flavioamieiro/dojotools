@@ -1,0 +1,9 @@
+Dependencies:
+  fpc
+
+TestUnit:
+  It uses PascalTestUnit, that is a simple test framework based on simple c test
+  Site: https://github.com/JoaoFelipe/PascalTestUnit
+
+  Would be great to replace it to FpcUnit
+  

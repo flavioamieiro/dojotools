@@ -1,0 +1,5 @@
+Dependencies:
+  ruby
+
+TestUnit
+  It uses rspec that comes with ruby
