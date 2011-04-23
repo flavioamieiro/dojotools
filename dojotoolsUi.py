@@ -39,7 +39,7 @@ KIMONO_ICON = os.path.join(IMAGE_DIR, 'kimono.png')
 
 __all__ = ['UserInterface']
 
-def enter_callback_ui(self, widget, entry_commands, entry_timer, DEFAULT_TIMER):
+def enter_callback_ui(self, widget, entry_commands, entry_timer, DEFAULT_TIMER, window):
     self.commands = entry_commands.get_text()
     self.round_timer = entry_timer.get_text()
     self.configure_dialog.hide()
@@ -57,7 +57,7 @@ def enter_callback_ui(self, widget, entry_commands, entry_timer, DEFAULT_TIMER):
     if self.ui != None:
         self.ui.re_initialize(timer)
     else:
-        self.ui = UserInterface(timer, window)
+        self.ui = UserInterface(timer, window.keys()[0])
 
     return True
 
