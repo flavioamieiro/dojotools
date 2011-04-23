@@ -411,8 +411,9 @@ if __name__ == '__main__':
         run_dojo_path = os.path.join(os.path.abspath(options.directory), 'run.dojo')
         if not args:
             if os.path.exists(run_dojo_path):
-                with open(run_dojo_path) as f:
-                    args = [f.read()]
+                args = ["sh run.dojo"]
+#                with open(run_dojo_path) as f:
+#                    args = [f.read()]
             else:
                 print lang.RUN_FILE_WARNING                
 
