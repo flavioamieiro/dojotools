@@ -417,15 +417,16 @@ if __name__ == '__main__':
 
                     if os.path.exists(generator_path):
                         print lang.LANGUAGE_FOUND %(language)
+                        capitalized_name = ''.join(part.capitalize() for part in problem_name.split('_'))
                         commands = [
                             "mkdir %s" %(folder_name),
                             "cd %s" %(folder_name),
                             "cp -ar %s* %s" %(generator_path, folder_path),
                             "cp -ar %s.??* %s" %(generator_path, folder_path),
                             "rename 's/#\*dojotools\*#/%s/' *" %(problem_name),
-                            "rename 's/#\*up_dojotools\*#/%s/' *" %(problem_name.capitalize()),
+                            "rename 's/#\*up_dojotools\*#/%s/' *" %(capitalized_name),
                             'find . -type f -exec sed -i "s/#\*dojotools\*#/%s/g" {} ";"' %(problem_name),
-                            'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(problem_name.capitalize()),
+                            'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(capitalized_name),
                         ]
 
                         run_command = "; ".join(commands)
