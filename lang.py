@@ -50,8 +50,6 @@ GENERATE_HELP = ("generate a folder with files for coding dojo. "
                  "GENERATE: '(language) (problem) (modifiers)'"
 )
 
-GENERATOR_ERROR = 'Generator failed to generate files'
-
 RUN_FILE_WARNING = "Dojotools couldn't find run.dojo. Now it's just a timer!" 
 
 MONITORING = 'Monitoring files in %s'
@@ -60,7 +58,18 @@ QUIT = 'press ^C to quit'
 
 LEAVING = '\nleaving...'
 
+
+GENERATOR_ERROR = 'Generator failed to generate files'
 GENERATING_MESSAGE = "Generating Folder..."
 LANGUAGE_FOUND = "Language found: %s"
 LANGUAGE_GENERATOR_ERROR = "%s generator wasn't found"
 DOJO_PATH_EXISTS_ERROR = "Dojo path already exists! Dojotools will try to run this code!"
+
+GENERATOR_MESSAGES = {
+    'error': GENERATOR_ERROR,
+    'message': GENERATING_MESSAGE,
+    'lang': LANGUAGE_FOUND,
+    'lang_error': LANGUAGE_GENERATOR_ERROR,
+    'exists': DOJO_PATH_EXISTS_ERROR,
+}
+

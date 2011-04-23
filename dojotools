@@ -35,6 +35,7 @@ import threading
 import datetime
 import lang
 from ui import UserInterface
+from generator import Generator
 
 
 
@@ -393,52 +394,13 @@ if __name__ == '__main__':
         print lang.IGNORING % (options.patterns_file)
         print lang.QUIT
 
-        if options.generate:
-            opts = options.generate.split(" ")
-            if len(opts) < 2:
-                print lang.GENERATOR_ERROR
-            else:
-                language = opts.pop(0)
-                problem_name = opts.pop(0)
-                extra_name = "_".join(opts)
-                if extra_name:
-                    extra_name = "_" + extra_name
-                today = datetime.datetime.today().strftime("%Y%m%d")
-
-                join = lambda a, b: os.path.join(os.path.abspath(a), b)
-    
-                folder_name = "%s%s_%s_%s" %(today, extra_name, language, problem_name)
-                
-                folder_path = join(os.path.curdir, folder_name)
-                generator_path = join(os.path.dirname(__file__), "generators/%s/" %(language))
-
-                if not os.path.exists(folder_path):
-                    print lang.GENERATING_MESSAGE
-
-                    if os.path.exists(generator_path):
-                        print lang.LANGUAGE_FOUND %(language)
-                        capitalized_name = ''.join(part.capitalize() for part in problem_name.split('_'))
-                        commands = [
-                            "mkdir %s" %(folder_name),
-                            "cd %s" %(folder_name),
-                            "cp -ar %s* %s" %(generator_path, folder_path),
-                            "cp -ar %s.??* %s" %(generator_path, folder_path),
-                            "rename 's/#\*dojotools\*#/%s/' *" %(problem_name),
-                            "rename 's/#\*up_dojotools\*#/%s/' *" %(capitalized_name),
-                            'find . -type f -exec sed -i "s/#\*dojotools\*#/%s/g" {} ";"' %(problem_name),
-                            'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(capitalized_name),
-                        ]
-
-                        run_command = "; ".join(commands)
-            
-                        os.popen(run_command)
-                    else:
-                        print lang.LANGUAGE_GENERATOR_ERROR %(language)
-                else:
-                    print lang.DOJO_PATH_EXISTS_ERROR
-
-                if options.directory == os.path.abspath(os.path.curdir):
-                    options.directory = folder_path
+        
+        generator = Generator(options.generate, messages=lang.GENERATOR_MESSAGES)
+        if generator.parse_opts():
+            generator.read_opts()
+            generator.generate() 
+            if generator.generated() and options.directory == os.path.abspath(os.path.curdir):  
+                options.directory = generator.folder_path
 
         if options.patterns_file == None:
             options.patterns_file = os.path.join(
