@@ -396,7 +396,7 @@ if __name__ == '__main__':
 
         
         generator = Generator(options.generate, messages=lang.GENERATOR_MESSAGES)
-        if generator.parse_opts():
+        if options.generate and generator.parse_opts():
             generator.read_opts()
             generator.generate() 
             if generator.generated() and options.directory == os.path.abspath(os.path.curdir):  
