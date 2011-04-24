@@ -9,6 +9,9 @@ TestUnit:
   It uses jasmine in terminal with jazz_money. Doesn't need a browser to run javascript
   Site: https://github.com/pivotalexperimental/jazz_money
 
+Interactive Shell:
+  firebug
+
 How To Install:
   Install RVM (google it)
   Follow these instructions to install stackdeck, johnson, harmony and jazz_money:

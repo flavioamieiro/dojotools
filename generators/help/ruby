@@ -1,5 +1,8 @@
 Dependencies:
   ruby
 
-TestUnit
+TestUnit:
   It uses rspec that comes with ruby
+
+Interactive Shell:
+  irb

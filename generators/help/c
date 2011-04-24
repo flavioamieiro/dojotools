@@ -4,3 +4,6 @@ Dependencies:
 UnitTest:
   It uses simple c test, a simple unit test framework for c.
   Site: http://simplectest.sourceforge.net/
+
+Interactive Shell:
+  "gdb", c-repl
