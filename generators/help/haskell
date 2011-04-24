@@ -1,0 +1,8 @@
+Dependencies:
+  haskell-platform
+
+TestUnit:
+  It uses HUnit that comes with haskell-platform
+
+Interactive Shell:
+  ghci
