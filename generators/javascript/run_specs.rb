@@ -2,11 +2,11 @@ require 'rubygems'
 require 'jazz_money'  
   
 javascript_files = [  
-  '#*up_dojotools*#Spec.js'  
+  '#*class_dojotools*#Spec.js'  
 ]  
   
 jasmine_spec_files = [  
-  '#*up_dojotools*#.js'
+  '#*class_dojotools*#.js'
 ]  
   
 jazz_money = JazzMoney::Runner.new(javascript_files, jasmine_spec_files)

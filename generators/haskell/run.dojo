@@ -1,1 +1,1 @@
-ghc --make Test#*up_dojotools*# -o Test#*up_dojotools*#.test && ./Test#*up_dojotools*#.test
+ghc --make Test#*class_dojotools*# -o Test#*class_dojotools*#.test && ./Test#*class_dojotools*#.test

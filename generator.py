@@ -65,7 +65,25 @@ class Generator(object):
         
         self.folder_path = join(os.path.curdir, self.folder_name)
         self.generator_path = join(os.path.dirname(__file__), "generators/%s/" %(self.language))
-        self.capitalized_name = ''.join(part.capitalize() for part in self.problem_name.split('_'))
+        
+        splitted_name =  self.problem_name.split('_')
+        
+        snake_case = self.problem_name
+        pascal_case = ''.join(part.capitalize() for part in splitted_name)
+        down_case = ''.join(splitted_name)
+        camel_case = splitted_name.pop(0) + ''.join([part.capitalize() for part in splitted_name])
+        
+        self.cases = {
+        
+            '#\*dojotools\*#' : snake_case,
+            '#\*class_dojotools\*#' : pascal_case,
+            '#\*down_dojotools\*#' : down_case,
+            '#\*camel_dojotools\*#' : camel_case,
+            
+        
+        }
+
+        
         return True
 
     def generate(self, show=True):
@@ -81,14 +99,15 @@ class Generator(object):
                     "cd %s" %(self.folder_name),
                     "cp -ar %s* %s" %(self.generator_path, self.folder_path),
                     "cp -ar %s.??* %s" %(self.generator_path, self.folder_path),
-                    'for FILE in `find . -name "*#\*dojotools\*#*"`; do NEW=`echo $FILE | sed -e "s/#\*dojotools\*#/%s/"`; mv "$FILE" "$NEW"; done' %(self.problem_name),
-                    'for FILE in `find . -name "*#\*up_dojotools\*#*"`; do NEW=`echo $FILE | sed -e "s/#\*up_dojotools\*#/%s/"`; mv "$FILE" "$NEW"; done' %(self.capitalized_name),
- 
-#                    "rename -R 's/#\*dojotools\*#/%s/' *" %(self.problem_name),
-#                    "rename -R 's/#\*up_dojotools\*#/%s/' *" %(self.capitalized_name),
-                    'find . -type f -exec sed -i "s/#\*dojotools\*#/%s/g" {} ";"' %(self.problem_name),
-                    'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(self.capitalized_name),
                 ]
+                for key in self.cases:
+                    dictionary={
+                        'key' : key,
+                        'value' : self.cases[key],
+                    }
+                    commands.append('for FILE in `find . -name "*%(key)s*"`; do NEW=`echo $FILE | sed -e "s/%(key)s/%(value)s/"`; mv "$FILE" "$NEW"; done' %(dictionary))
+                    commands.append('find . -type f -exec sed -i "s/%(key)s/%(value)s/g" {} ";"' %(dictionary))
+                
 
                 run_command = "; ".join(commands)
     

@@ -1,6 +1,6 @@
-Test#*up_dojotools*#.test
-Test#*up_dojotools*#.o
+Test#*class_dojotools*#.test
+Test#*class_dojotools*#.o
 TestUnit.ppu
 TestUnit.o
-#*up_dojotools*#Unit.ppu
-#*up_dojotools*#Unit.o
+#*class_dojotools*#Unit.ppu
+#*class_dojotools*#Unit.o

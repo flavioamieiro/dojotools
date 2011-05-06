@@ -1,6 +1,6 @@
 require '#*dojotools*#'
 
-describe '#*up_dojotools*#' do
+describe '#*class_dojotools*#' do
   it 'should test #*dojotools*#' do
     #*dojotools*#.should == nil
   end
