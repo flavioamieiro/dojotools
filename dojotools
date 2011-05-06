@@ -76,7 +76,8 @@ class RunThread (threading.Thread):
         status = self.process.wait()
         try:
             if self.arduino:
-                arduino.send_message(status)
+                arduino.send_message(status, last=self.status)
+                self.status = status
         except:
             print lang.ARDUINO_ERROR
         
@@ -157,6 +158,7 @@ class Monitor(object):
         self.arduino = arduino
         self.use_thread = use_thread
         self.before = before
+        self.status = False
      
         gobject.timeout_add(1000, self.check)
 
@@ -250,7 +252,8 @@ class Monitor(object):
         status = process.wait()
         try:
             if self.arduino:
-                arduino.send_message(status)
+                arduino.send_message(status, last=self.status)
+                self.status = status
         except:
             print lang.ARDUINO_ERROR
         if not before_command:

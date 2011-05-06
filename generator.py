@@ -81,8 +81,11 @@ class Generator(object):
                     "cd %s" %(self.folder_name),
                     "cp -ar %s* %s" %(self.generator_path, self.folder_path),
                     "cp -ar %s.??* %s" %(self.generator_path, self.folder_path),
-                    "rename 's/#\*dojotools\*#/%s/' *" %(self.problem_name),
-                    "rename 's/#\*up_dojotools\*#/%s/' *" %(self.capitalized_name),
+                    'for FILE in `find . -name "*#\*dojotools\*#*"`; do NEW=`echo $FILE | sed -e "s/#\*dojotools\*#/%s/"`; mv "$FILE" "$NEW"; done' %(self.problem_name),
+                    'for FILE in `find . -name "*#\*up_dojotools\*#*"`; do NEW=`echo $FILE | sed -e "s/#\*up_dojotools\*#/%s/"`; mv "$FILE" "$NEW"; done' %(self.capitalized_name),
+ 
+#                    "rename -R 's/#\*dojotools\*#/%s/' *" %(self.problem_name),
+#                    "rename -R 's/#\*up_dojotools\*#/%s/' *" %(self.capitalized_name),
                     'find . -type f -exec sed -i "s/#\*dojotools\*#/%s/g" {} ";"' %(self.problem_name),
                     'find . -type f -exec sed -i "s/#\*up_dojotools\*#/%s/g"  {} ";"' %(self.capitalized_name),
                 ]

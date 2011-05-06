@@ -1,0 +1,2 @@
+javac -cp junit.jar:. ./src/#*dojotools*#/#*up_dojotools*#.java -d ./build/classes && javac -cp junit.jar:.:./build/classes ./test/Test#*up_dojotools*#.java -d ./build/test/classes && java -cp junit.jar:.:./build/classes:./build/test/classes org.junit.runner.JUnitCore Test#*up_dojotools*#
+
