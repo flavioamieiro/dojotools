@@ -10,3 +10,16 @@ Dojotools-gedit instalation:
     Step 6: 'Commands to execute': command responsable for the tests run, like 'python ~/codigos/teste_JoKenPo.py', OK and Close.
     Step 7: save the archive, then the tab 'Dojo Tools Output' will apear.
     Step 8: just enjoy and have some fun. \o/
+
+Dojotools é usado para auxiliar em sessões de dojo.
+
+Instalação do plugin:
+
+    passo 1: mova todos os arquivos do diretório para ~/.gnome2/gedit/plugins/.
+    passo 2: mova a imagem dojotools-images/kimono.png para /usr/share/icons/gnome/32x32/actions/.
+    passo 3: abra o editor Gedit com os arquivos para editar e pressione CTRL + F9.
+    passo 4: vá em Editar - Preferências, Plug-ins, e ative o plugin Dojo Tools.
+    passo 5: Para editar os comandos e o tempo vá em Preferências.
+    passo 6: 'Comandos para executar': comando responsáver por rodar os testes, exemplo: 'python ~/codigos/teste_JoKenPo.py', pressione OK e feche.
+    passo 7: Ao salvar o arquivo a aba 'Dojo Tools Output' irá aparecer.
+    passo 8: Divirta-se. \o/
