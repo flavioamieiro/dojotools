@@ -26,7 +26,6 @@ import os
 import sys
 from fnmatch import fnmatch
 import subprocess
-from time import ctime
 from optparse import OptionParser
 import gtk
 import gobject
@@ -198,23 +197,6 @@ class Monitor(object):
             files = [f for f in files if not fnmatch(f, p)]
         return files
 
-    def git_commit_all(self):
-        """
-        Adds all files and commits them using git
-        """
-        msg = ctime()
-        process = subprocess.Popen(
-            "git add . && git commit -m '%s'" % msg,
-            shell=True,
-            cwd=self.directory,
-        )
-
-        #if git returns 128 it means 'command not found' or 'not a git repo'
-        if process.wait() == 128:
-            error = (lang.GIT_ERROR1+
-                    lang.GIT_ERROR2)
-            raise OSError(error)
-
     def run_command(self, test_cmd):
         """
         As the name says, runs a command 
@@ -287,7 +269,7 @@ class Monitor(object):
             for command in self.commands:
                 self.run_command(command)
             if self.commit:
-                self.git_commit_all()
+                self.ui.git_commit_all()
             self.old_sum = new_sum
 
         # This method must return True so gobject.timeout_add runs it again
@@ -385,6 +367,15 @@ def parse_options():
         default = ""
     )
     
+    parser.add_option(
+        '-w',
+        '--who',
+        action = 'store_true',
+        dest = 'who',
+        help = lang.WHO_HELP,
+        default = False
+    )
+    
     return parser.parse_args()
 
 
@@ -421,7 +412,16 @@ if __name__ == '__main__':
                 print lang.RUN_FILE_WARNING                
 
         timer = Timer(options.round_time)
-        ui = UserInterface(timer, options.use_thread, options.unstoppable)
+        ui = UserInterface(
+            timer, 
+            options.use_thread, 
+            options.unstoppable, 
+            options.directory,
+            who = options.who
+        )
+        
+       
+        
         monitor = Monitor(
             ui = ui,
             directory = options.directory,
@@ -439,4 +439,6 @@ if __name__ == '__main__':
         print lang.LEAVING
         if options.use_thread:
             ui.thread.stop()
+        if options.who:
+            ui.git_commit_all()
         sys.exit(0)

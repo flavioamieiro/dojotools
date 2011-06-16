@@ -49,6 +49,7 @@ UNSTOPPABLE_HELP = ("if this flag is used, the time won't stop after the end of 
 GENERATE_HELP = ("generate a folder with files for coding dojo. "
                  "GENERATE: '(language) (problem) (modifiers)'"
 )
+WHO_HELP = ("if this flag is used, dojotools will ask who is the pilot before each session")
 
 RUN_FILE_WARNING = "Dojotools couldn't find run.dojo. Now it's just a timer!" 
 
@@ -72,4 +73,8 @@ GENERATOR_MESSAGES = {
     'lang_error': LANGUAGE_GENERATOR_ERROR,
     'exists': DOJO_PATH_EXISTS_ERROR,
 }
+
+WRITE_WHO = 'Who plays?'
+
+
 

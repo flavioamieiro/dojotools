@@ -25,6 +25,8 @@ import sys
 import gtk
 import gobject
 import lang
+import subprocess
+from time import ctime
 
 try:
     import pynotify
@@ -43,7 +45,7 @@ __all__ = ['UserInterface']
         
 class UserInterface(object):
 
-    def __init__(self, timer, use_thread, unstoppable):
+    def __init__(self, timer, use_thread, unstoppable, directory, who=False):
         self.timer = timer
         self.current_status = 0
         
@@ -59,6 +61,14 @@ class UserInterface(object):
         self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
+        
+        self.directory = directory
+        
+        self.who = who
+        self.who_plays = "Unknown"
+        self.unstoppable_sensitive(
+            lambda: self.warn_set_who()
+        )
 
     def _timer_items_set_sensitive(self, value):
         self.timer_item.set_sensitive(value)
@@ -178,7 +188,15 @@ class UserInterface(object):
 
     def warn_time_is_up(self, message):
         """Shows a dialog warning the pilot that his time is up"""
-        self.warn([gtk.Label(message)])
+        if self.who:
+            self.git_commit_all()
+            text_input = gtk.Entry(30)
+            text_input.set_text(str(self.who_plays))
+            
+            who_text = self.warn([gtk.Label(message),gtk.Label(lang.WRITE_WHO), text_input], result_index = 2)
+            self.who_plays = who_text 
+        else:
+            self.warn([gtk.Label(message)])
         
     def warn_set_time(self):
         """Shows a dialog to change round time"""   
@@ -191,6 +209,15 @@ class UserInterface(object):
             self.set_time_item.set_label(lang.SET_TIME % (self.timer.round_time))
         except ValueError:
             self.warn([gtk.Label(lang.VALUE_ERROR)])
+            
+    def warn_set_who(self):
+        """Shows a dialog to change who plays"""   
+        if self.who:
+            text_input = gtk.Entry(30)
+            text_input.set_text(str(self.who_plays))
+            
+            who_text = self.warn([gtk.Label(lang.WRITE_WHO), text_input], result_index = 1)
+            self.who_plays = who_text
 
     def html_escape(self, text):
         """Produce entities within text."""		 
@@ -243,12 +270,43 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
-            if not self.unstoppable:
-                self.pause_timer()
-                self._timer_items_set_sensitive(False)
-                self.warn_time_is_up(lang.TIME_IS_UP)
-                self._timer_items_set_sensitive(True)
-                self.start_timer()
-            else:
-                self.warn_time_is_up(lang.TIME_IS_UP_UNSTOPPABLE)
+            self.unstoppable_sensitive(
+                lambda: self.warn_time_is_up(lang.TIME_IS_UP),
+                lambda: self.warn_time_is_up(lang.TIME_IS_UP_UNSTOPPABLE)
+            )
+                
         return True
+    
+    def unstoppable_sensitive(self, non_unstoppable, unstoppable=None):
+        if not self.unstoppable:
+            self.pause_timer()
+            self._timer_items_set_sensitive(False)
+            non_unstoppable()
+            self._timer_items_set_sensitive(True)
+            self.start_timer()
+        else:
+            unstoppable() if unstoppable else non_unstoppable()
+            
+    def git_commit_all(self):
+        """
+        Adds all files and commits them using git
+        """
+        msg = ctime()
+
+        if not self.who:
+            command = "git add . && git commit -m '%s'" % (msg)
+        else:    
+            command = "git add . && git commit -m '%s' --author='%s <dojotools@dojo>'" % (msg, self.who_plays)
+            
+        process = subprocess.Popen(
+            command,
+            shell=True,
+            cwd=self.directory,
+        )
+
+        #if git returns 128 it means 'command not found' or 'not a git repo'
+        if process.wait() == 128:
+            error = (lang.GIT_ERROR1+
+                    lang.GIT_ERROR2)
+            raise OSError(error)
+                
