@@ -125,6 +125,15 @@ class Generator(object):
         return ((not self.errors) or self.messages['exists'] in self.errors)     
 
 
+def generate(generate, directory, messages):
+    generator = Generator(generate, messages=messages)
+    if generate and generator.parse_opts():
+        generator.read_opts()
+        generator.generate() 
+        if generator.generated() and directory == os.path.abspath(os.path.curdir):  
+            return generator.folder_path
+    return directory
+
 if __name__ == '__main__':
     args = sys.argv
     args.pop(0)

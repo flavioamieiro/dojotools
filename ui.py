@@ -66,9 +66,13 @@ class UserInterface(object):
         
         self.who = who
         self.who_plays = "Unknown"
+        
+        
+    def init(self):
         self.unstoppable_sensitive(
             lambda: self.warn_set_who()
         )
+        gtk.main()
 
     def _timer_items_set_sensitive(self, value):
         self.timer_item.set_sensitive(value)
