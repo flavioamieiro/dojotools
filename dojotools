@@ -28,7 +28,7 @@ import lang
 from optparse import OptionParser
 from ui import UserInterface
 from generator import generate
-from tools import RunThread, Timer, Monitor 
+from tools import DojoPlayer, RunThread, Timer, Monitor 
 
 def parse_options():
     usage = "%prog [OPTIONS] COMMAND ..."
@@ -160,18 +160,17 @@ if __name__ == '__main__':
         if not args:
             if os.path.exists(run_dojo_path):
                 args = ["sh run.dojo"]
-#                with open(run_dojo_path) as f:
-#                    args = [f.read()]
             else:
-                print lang.RUN_FILE_WARNING                
+                print lang.RUN_FILE_WARNING          
+                
+        player = DojoPlayer(options.directory, options.who)               
 
         timer = Timer(options.round_time)
         ui = UserInterface(
             timer, 
             options.use_thread, 
             options.unstoppable, 
-            options.directory,
-            who = options.who
+            player,
         )
         
        

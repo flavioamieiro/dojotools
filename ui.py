@@ -45,7 +45,7 @@ __all__ = ['UserInterface']
         
 class UserInterface(object):
 
-    def __init__(self, timer, use_thread, unstoppable, directory, who=False):
+    def __init__(self, timer, use_thread, unstoppable, player):
         self.timer = timer
         self.current_status = 0
         
@@ -64,8 +64,7 @@ class UserInterface(object):
         
         self.directory = directory
         
-        self.who = who
-        self.who_plays = "Unknown"
+        self.player = player
         
         
     def init(self):
@@ -192,13 +191,13 @@ class UserInterface(object):
 
     def warn_time_is_up(self, message):
         """Shows a dialog warning the pilot that his time is up"""
-        if self.who:
-            self.git_commit_all()
+        if self.player.who:
+            self.player.commit()
             text_input = gtk.Entry(30)
-            text_input.set_text(str(self.who_plays))
+            text_input.set_text(str(self.player.name))
             
             who_text = self.warn([gtk.Label(message),gtk.Label(lang.WRITE_WHO), text_input], result_index = 2)
-            self.who_plays = who_text 
+            self.player.name = who_text 
         else:
             self.warn([gtk.Label(message)])
         
@@ -218,10 +217,10 @@ class UserInterface(object):
         """Shows a dialog to change who plays"""   
         if self.who:
             text_input = gtk.Entry(30)
-            text_input.set_text(str(self.who_plays))
+            text_input.set_text(str(self.player.name))
             
             who_text = self.warn([gtk.Label(lang.WRITE_WHO), text_input], result_index = 1)
-            self.who_plays = who_text
+            self.player.name = who_text
 
     def html_escape(self, text):
         """Produce entities within text."""		 
@@ -291,26 +290,4 @@ class UserInterface(object):
         else:
             unstoppable() if unstoppable else non_unstoppable()
             
-    def git_commit_all(self):
-        """
-        Adds all files and commits them using git
-        """
-        msg = ctime()
 
-        if not self.who:
-            command = "git add . && git commit -m '%s'" % (msg)
-        else:    
-            command = "git add . && git commit -m '%s' --author='%s <dojotools@dojo>'" % (msg, self.who_plays)
-            
-        process = subprocess.Popen(
-            command,
-            shell=True,
-            cwd=self.directory,
-        )
-
-        #if git returns 128 it means 'command not found' or 'not a git repo'
-        if process.wait() == 128:
-            error = (lang.GIT_ERROR1+
-                    lang.GIT_ERROR2)
-            raise OSError(error)
-                
