@@ -26,7 +26,6 @@ import gtk
 import gobject
 import lang
 import subprocess
-from time import ctime
 
 try:
     import pynotify
@@ -52,25 +51,21 @@ class UserInterface(object):
         self.thread = None
         self.use_thread = use_thread
 
+        self.unstoppable = unstoppable
+        self.player = player
+        
         self.status_icon = gtk.StatusIcon()
         self.status_icon.set_from_file(PASS_ICON)
         self._create_menu()
         self.status_icon.set_visible(True)
-        self.unstoppable = unstoppable
-        
+            
         self.start_timer()
 
         gobject.timeout_add(1000, self.update_timer)
         
-        self.directory = directory
-        
-        self.player = player
-        
         
     def init(self):
-        self.unstoppable_sensitive(
-            lambda: self.warn_set_who()
-        )
+        self.stop(self.warn_set_who, condition=not self.unstoppable)
         gtk.main()
 
     def _timer_items_set_sensitive(self, value):
@@ -117,7 +112,6 @@ class UserInterface(object):
         data.show_all()
         data.popup(None, None, None, button, time)
 
-   
     def _set_icon(self):
         self.status_icon.set_from_file(
             PASS_ICON if self.current_status == 0 else FAIL_ICON
@@ -130,14 +124,7 @@ class UserInterface(object):
         
     def set_time(self, widget=None):
         """Shows dialog to set time"""
-        self.timer_item.set_sensitive(False)
-        if self.timer.running:
-            self.pause_timer()
-            self.warn_set_time()
-            self.timer_item.set_sensitive(True)
-            self.start_timer()
-        else:
-            self.warn_set_time()
+        self.stop(self.warn_set_time, condition=self.timer.running)
             
     def reset_time(self, widget=None):
         self.timer.time_left = self.timer.round_time 
@@ -192,7 +179,7 @@ class UserInterface(object):
     def warn_time_is_up(self, message):
         """Shows a dialog warning the pilot that his time is up"""
         if self.player.who:
-            self.player.commit()
+            self.player.special_commit()
             text_input = gtk.Entry(30)
             text_input.set_text(str(self.player.name))
             
@@ -215,7 +202,7 @@ class UserInterface(object):
             
     def warn_set_who(self):
         """Shows a dialog to change who plays"""   
-        if self.who:
+        if self.player.who:
             text_input = gtk.Entry(30)
             text_input.set_text(str(self.player.name))
             
@@ -273,21 +260,23 @@ class UserInterface(object):
             )
             self.status_icon.set_tooltip(time_str)
         else:
-            self.unstoppable_sensitive(
-                lambda: self.warn_time_is_up(lang.TIME_IS_UP),
-                lambda: self.warn_time_is_up(lang.TIME_IS_UP_UNSTOPPABLE)
+            self.stop(
+                lambda: self.warn_time_is_up(
+                    lang.TIME_IS_UP_UNSTOPPABLE if self.unstoppable else lang.TIME_IS_UP
+                ),
+                condition = not self.unstoppable
             )
                 
         return True
     
-    def unstoppable_sensitive(self, non_unstoppable, unstoppable=None):
-        if not self.unstoppable:
+    def stop(self, func, condition=None):
+        if condition:
             self.pause_timer()
             self._timer_items_set_sensitive(False)
-            non_unstoppable()
+            func()
             self._timer_items_set_sensitive(True)
             self.start_timer()
         else:
-            unstoppable() if unstoppable else non_unstoppable()
+            func()
             
 

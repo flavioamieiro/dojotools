@@ -8,90 +8,107 @@ import datetime
 import arduino
 import lang
 from fnmatch import fnmatch
+from time import ctime
 
 
-def git_commit(self, directory, author=None):
+    
+
+def git_commit(author=None):
     """
     Adds all files and commits them using git
     """
     msg = ctime()
 
-    if not author:
-        command = "git add . && git commit -m '%s'" % (msg)
-    else:    
-        command = "git add . && git commit -m '%s' --author='%s <dojotools@dojo>'" % (msg, self.who_plays)
+    command = "git add . && git commit -m '%s'" % (msg)
+    if author:
+        command += " --author='%s <dojotools@dojo>'" % (author)
         
-    process = subprocess.Popen(
-        command,
-        shell=True,
-        cwd=directory,
-    )
+    _, _, process = execute(command)    
 
     #if git returns 128 it means 'command not found' or 'not a git repo'
     if process.wait() == 128:
         error = (lang.GIT_ERROR1+
                 lang.GIT_ERROR2)
         raise OSError(error)
+    
+def set_execute_config(directory="", arduino=False):
+    execute.use_arduino = arduino
+    execute.directory = directory 
+       
+def execute(command, old_status=False, arduino=False):
+    process = subprocess.Popen(
+        command,
+        shell = True,
+        cwd = execute.directory,
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE,
+    )
+
+    output = process.stdout.read()
+    output += process.stderr.read()
+    status = process.wait()
+    if execute.use_arduino and arduino:
+        arduino_message(status, old_status)       
+    return (status, output, process)   
+    
+       
             
+def arduino_message(status, old_status):
+    try:
+        arduino.send_message(status, last=old_status)
+    except:
+        print lang.ARDUINO_ERROR
+                
+      
 
 class DojoPlayer(object):
-    def __init__(self, directory, who):
-        self.directory = directory
+    def __init__(self, who, can_commit=False):
         self.who = who
         self.name = "Unknown"
+        self.can_commit = can_commit
         
     def commit(self):
-        git_commit(self.directory, author=self.name if self.who else None)        
+        if self.can_commit:
+            git_commit(author=self.name if self.who else None)        
     
-
-
-
+    def special_commit(self): 
+        """End of Session special commit"""
+        if self.who:
+            git_commit(author=self.name if self.who else None)      
+    
 class RunThread (threading.Thread):
     """Thread class to run and terminate commands."""
 
-    def __init__ (self, test_cmd,  monitor):
+    def __init__ (self, test_cmd,  ui):
         super(RunThread, self).__init__()
         self._stop = threading.Event()
         self.test_cmd = test_cmd
-        self.directory = monitor.directory
-        self.arduino = monitor.arduino
-        self.ui = monitor.ui
+        self.ui = ui
         self.start_time = '%02d:%02d:%02d' % (
                 (datetime.datetime.now().hour),
                 (datetime.datetime.now().minute),
                 (datetime.datetime.now().second),
             )
         self.process = None
+        self.status = False
         
     def run(self):
         """
         runs a command and waits for it to finish
         """
         self.ui.set_kill_label(lang.KILL % (self.__repr__()))
-        self.process = subprocess.Popen(
-            self.test_cmd,
-            shell = True,
-            cwd = self.directory,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE,
+        self.status, output, self.process = execute(
+            self.test_cmd, 
+            old_status=self.status,
+            arduino=True
         )
-
-        output = self.process.stdout.read()
-        output += self.process.stderr.read()
-        status = self.process.wait()
-        try:
-            if self.arduino:
-                arduino.send_message(status, last=self.status)
-                self.status = status
-        except:
-            print lang.ARDUINO_ERROR
         
         self.ui.set_kill_label()
         self.stop()
-        self.ui.show_command_results(status, output)
+        self.ui.show_command_results(self.status, output)
         return output
                 
-    def stop (self):
+    def stop(self):
         """Stop thread and terminate running command"""
         if not self.ui.kill_item.get_label() == lang.NO_RUNNING:
             self.ui.show_command_results(True, lang.INTERRUPTED_EXECUTION)
@@ -100,15 +117,14 @@ class RunThread (threading.Thread):
         try:
             self.process.stdout.close() 
             self.process.stderr.close() 
-            self.process.terminate()   
-              
+            self.process.terminate()           
         except:
             pass
         
         self._stop.set()
         self._Thread__stop()
 
-    def stopped (self):
+    def stopped(self):
         return self._stop.isSet()
         
     def __repr__(self):
@@ -141,12 +157,8 @@ class Timer(object):
 
 class Monitor(object):
 
-    def __init__(self, ui, directory, commands, patterns_file, commit=False, arduino=False, use_thread=False, before=""):
+    def __init__(self, ui, directory, commands, patterns_file, player, use_thread=False, before=""):
         """
-        'directory' is the directory to be watched for changes.
-
-        --
-
         'commands' is a list with the commands to run when a file changes
 
         --
@@ -155,15 +167,14 @@ class Monitor(object):
         be used to filter the files we're watching.
         """
         self.old_sum = 0
-        self.directory = directory
         self.commands = commands
         self.patterns = self._get_patterns(patterns_file)
         self.ui = ui
-        self.commit = commit
-        self.arduino = arduino
+        self.player = player
         self.use_thread = use_thread
         self.before = before
         self.status = False
+        self.directory = directory
      
         gobject.timeout_add(1000, self.check)
 
@@ -205,50 +216,20 @@ class Monitor(object):
 
     def run_command(self, test_cmd):
         """
-        As the name says, runs a command 
+        As the name says, runs a command
         """
         if self.before:
-            self._normal_run(self.before, before_command=True)
+            _, output, _ = execute(self.before)
+            sys.stdout.write(output)
             
         if self.use_thread:
-            self._run_by_thread(test_cmd)
+            thread = RunThread(test_cmd, self.ui)
+            thread.start()
+            self.ui.thread = thread
         else:
-            self._normal_run(test_cmd)
-        
-    def _run_by_thread(self, test_cmd):
-        """
-        Runs command in a thread without waiting for it to finish
-        """
-        thread = RunThread(test_cmd, self)
-        thread.start()
-        self.ui.thread = thread
-        
-    def _normal_run(self, test_cmd, before_command=False):
-        """
-        Runs a command and waits for it to finish"
-        """
-        process = subprocess.Popen(
-            test_cmd,
-            shell = True,
-            cwd = self.directory,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE,
-        )
-
-        output = process.stdout.read()
-        output += process.stderr.read()
-        status = process.wait()
-        try:
-            if self.arduino:
-                arduino.send_message(status, last=self.status)
-                self.status = status
-        except:
-            print lang.ARDUINO_ERROR
-        if not before_command:
-            self.ui.show_command_results(status, output)
-        else:
-            sys.stdout.write(output)
-        
+            self.status, output, _ = execute(test_cmd, self.status, arduino=True)
+            self.ui.show_command_results(self.status, output)
+          
     def check(self):
         """
         Monitor self.directory for changes, ignoring files matching any item
@@ -274,9 +255,7 @@ class Monitor(object):
         if new_sum != self.old_sum:
             for command in self.commands:
                 self.run_command(command)
-            if self.commit:
-                self.ui.git_commit_all()
+            self.player.commit()
             self.old_sum = new_sum
-
         # This method must return True so gobject.timeout_add runs it again
         return True

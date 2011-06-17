@@ -28,7 +28,10 @@ import lang
 from optparse import OptionParser
 from ui import UserInterface
 from generator import generate
-from tools import DojoPlayer, RunThread, Timer, Monitor 
+from tools import DojoPlayer, RunThread, Timer, Monitor, set_execute_config
+
+
+
 
 def parse_options():
     usage = "%prog [OPTIONS] COMMAND ..."
@@ -138,12 +141,7 @@ if __name__ == '__main__':
 
     options, args = parse_options()
 
-    try:
-        print lang.MONITORING % options.directory
-        print lang.IGNORING % (options.patterns_file)
-        print lang.QUIT
-
-        
+    try:        
         options.directory = generate(
             options.generate, 
             options.directory, 
@@ -163,7 +161,18 @@ if __name__ == '__main__':
             else:
                 print lang.RUN_FILE_WARNING          
                 
-        player = DojoPlayer(options.directory, options.who)               
+        print lang.MONITORING % options.directory
+        print lang.IGNORING % (options.patterns_file)
+        print lang.QUIT        
+                
+        set_execute_config(
+            directory = options.directory,
+            arduino = options.arduino
+        )
+                
+        player = DojoPlayer(options.who, can_commit=options.commit)     
+                  
+
 
         timer = Timer(options.round_time)
         ui = UserInterface(
@@ -180,8 +189,7 @@ if __name__ == '__main__':
             directory = options.directory,
             commands = args,
             patterns_file = options.patterns_file,
-            commit = options.commit,
-            arduino = options.arduino,
+            player = player,
             use_thread = options.use_thread,
             before = options.before_command,
         )
@@ -193,6 +201,5 @@ if __name__ == '__main__':
         print lang.LEAVING
         if options.use_thread:
             ui.thread.stop()
-        if options.who:
-            ui.git_commit_all()
+        player.special_commit()
         sys.exit(0)
