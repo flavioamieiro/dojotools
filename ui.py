@@ -37,8 +37,8 @@ except ImportError:
 
 
 IMAGE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'images/')
-PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt.png')
-FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt.png')
+PASS_ICON = os.path.join(IMAGE_DIR, 'green_belt_icon.png')
+FAIL_ICON = os.path.join(IMAGE_DIR, 'red_belt_icon.png')
 
 __all__ = ['UserInterface']
         
@@ -60,6 +60,8 @@ class UserInterface(object):
         self.status_icon.set_visible(True)
             
         self.start_timer()
+
+        self.notification = None
 
         gobject.timeout_add(1000, self.update_timer)
         
@@ -112,10 +114,11 @@ class UserInterface(object):
         data.show_all()
         data.popup(None, None, None, button, time)
 
+    def _current_icon(self):
+        return PASS_ICON if self.current_status == 0 else FAIL_ICON
+
     def _set_icon(self):
-        self.status_icon.set_from_file(
-            PASS_ICON if self.current_status == 0 else FAIL_ICON
-        )
+        self.status_icon.set_from_file(self._current_icon())
         
     def set_kill_label(self, label=lang.NO_RUNNING):
         """Change kill_item label"""
@@ -242,15 +245,24 @@ class UserInterface(object):
         if self.timer.running:
             self._set_icon()
 
+        self.send_notification(output)
+
+    def send_notification(self, message):
         if pynotify is not None:
             pynotify.init('dojotools')
-            message = pynotify.Notification('Dojotools', self.html_escape(output))
-            message.attach_to_status_icon(self.status_icon)
-            message.set_urgency(
-                pynotify.URGENCY_NORMAL if status == 0
-                else pynotify.URGENCY_CRITICAL
+            if self.notification:
+                self.notification.close()
+            self.notification = pynotify.Notification(
+                'Dojotools', 
+                self.html_escape(message), 
+                self._current_icon()
             )
-            message.show() 
+            self.notification.attach_to_status_icon(self.status_icon)
+            self.notification.set_urgency(
+                pynotify.URGENCY_NORMAL
+            )
+            self.notification.show() 
+
 
     def update_timer(self):
         if self.timer.time_left:
