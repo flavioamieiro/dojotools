@@ -26,6 +26,7 @@ import gtk
 import gobject
 import lang
 import subprocess
+import re
 
 try:
     import pynotify
@@ -213,7 +214,7 @@ class UserInterface(object):
             self.player.name = who_text
 
     def html_escape(self, text):
-        """Produce entities within text."""		 
+        """Produce entities within text."""
         html_escape_table = {
             "&": "&amp;",
             '"': "&quot;",
@@ -221,7 +222,9 @@ class UserInterface(object):
             ">": "&gt;",
             "<": "&lt;",
         }
-        return "".join(html_escape_table.get(c,c) for c in text)
+	return re.sub('\x1B\[([0-9]{1,3}((;[0-9]{1,3})*)?)?[m|K]', '', "".join(html_escape_table.get(c,c) for c in text))
+
+	
 
     def show_command_results(self, status, output):
         """
@@ -257,7 +260,8 @@ class UserInterface(object):
                 self.html_escape(message), 
                 self._current_icon()
             )
-            self.notification.attach_to_status_icon(self.status_icon)
+			#Deprecated?
+            #self.notification.attach_to_status_icon(self.status_icon)
             self.notification.set_urgency(
                 pynotify.URGENCY_NORMAL
             )

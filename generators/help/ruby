@@ -1,8 +1,10 @@
 Dependencies:
   ruby
+  rspec
 
 TestUnit:
-  It uses rspec that comes with ruby
+  It uses rspec that can be downloaded by
+  gem install rspec
 
 Interactive Shell:
   irb

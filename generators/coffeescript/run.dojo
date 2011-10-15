@@ -1,0 +1,2 @@
+coffee -c #*dojotools*#.coffee &&
+jasmine-node --coffee .

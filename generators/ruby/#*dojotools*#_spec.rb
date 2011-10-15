@@ -1,3 +1,4 @@
+$LOAD_PATH << './'
 require '#*dojotools*#'
 
 describe '#*class_dojotools*#' do

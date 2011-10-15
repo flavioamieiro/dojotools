@@ -1,4 +1,4 @@
-function #*camel_dojotools*#() {
+exports.#*camel_dojotools*# = function() {
     return 1
 }
 
