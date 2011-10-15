@@ -75,10 +75,10 @@ class Generator(object):
         
         self.cases = {
         
-            '#\*dojotools\*#' : snake_case,
-            '#\*class_dojotools\*#' : pascal_case,
-            '#\*down_dojotools\*#' : down_case,
-            '#\*camel_dojotools\*#' : camel_case,
+            '#_#dojotools#_#' : snake_case,
+            '#_#class_dojotools#_#' : pascal_case,
+            '#_#down_dojotools#_#' : down_case,
+            '#_#camel_dojotools#_#' : camel_case,
             
         
         }

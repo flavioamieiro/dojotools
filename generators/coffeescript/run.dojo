@@ -1,2 +1,2 @@
-coffee -c #*dojotools*#.coffee &&
+coffee -c #_#dojotools#_#.coffee &&
 jasmine-node --coffee .

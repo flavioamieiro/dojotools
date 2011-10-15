@@ -2,5 +2,5 @@ find ./src -name *.java > sources_list.txt && # dir .\src\*.java /s /B > sources
 find ./test -name *.java > tests_list.txt && # dir .\src\*.java /s /B > tests_list.txt
 javac -cp junit.jar:. @sources_list.txt -d ./build/classes && 
 javac -cp junit.jar:.:./build/classes @tests_list.txt -d ./build/test/classes && 
-java -cp junit.jar:.:./build/classes:./build/test/classes org.junit.runner.JUnitCore Test#*class_dojotools*#
+java -cp junit.jar:.:./build/classes:./build/test/classes org.junit.runner.JUnitCore Test#_#class_dojotools#_#
 
