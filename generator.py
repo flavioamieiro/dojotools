@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import sys
+import re
 
 GENERATOR_MESSAGES = {
     'error': 'Generator failed to generate files',
@@ -86,6 +87,29 @@ class Generator(object):
         
         return True
 
+    def replace(self, text):
+        for sub, replace in self.cases.iteritems():
+            text = re.sub(sub, replace, text) 
+        return text
+
+    def copy_and_rename(self, current, folder_name, original):
+        isdir = lambda x: os.path.isdir(x) and not os.path.islink(x)        
+
+        folder_path = join(current, folder_name)
+        os.mkdir(folder_path)
+        file_list = os.listdir(original)
+        for infile in file_list:
+            gen_path = join(original, infile) 
+            if isdir(gen_path):
+                self.copy_and_rename(folder_path, infile, gen_path)
+            else:
+                new_path = join(folder_path,self.replace(infile))
+                #with open(new_path, 'w') as w, open(gen_path, 'r') as r: #python 2.7
+                with open(new_path, 'w') as w:
+                    with open(gen_path, 'r') as r:
+                        for line in r:
+                            w.write(self.replace(line))
+        
     def generate(self, show=True):
         if self.errors:
             return self.show_errors(show)
@@ -94,24 +118,7 @@ class Generator(object):
 
             if os.path.exists(self.generator_path):
                 sprint(self.messages['lang'] %(self.language), show)
-                commands = [
-                    "mkdir %s" %(self.folder_name),
-                    "cd %s" %(self.folder_name),
-                    "cp -ar %s* %s" %(self.generator_path, self.folder_path),
-                    "cp -ar %s.??* %s" %(self.generator_path, self.folder_path),
-                ]
-                for key in self.cases:
-                    dictionary={
-                        'key' : key,
-                        'value' : self.cases[key],
-                    }
-                    commands.append('for FILE in `find . -name "*%(key)s*"`; do NEW=`echo $FILE | sed -e "s/%(key)s/%(value)s/"`; mv "$FILE" "$NEW"; done' %(dictionary))
-                    commands.append('find . -type f -exec sed -i "s/%(key)s/%(value)s/g" {} ";"' %(dictionary))
-                
-
-                run_command = "; ".join(commands)
-    
-                os.popen(run_command)
+                self.copy_and_rename(os.path.curdir, self.folder_name, self.generator_path)
             else:
                 self.errors.append(self.messages['lang_error'] %(self.language))
                 self.show_errors(show)
