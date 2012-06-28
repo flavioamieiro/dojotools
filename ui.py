@@ -139,7 +139,6 @@ class UserInterface(object):
         if pynotify is not None:
             pynotify.init('dojotools')
             message = pynotify.Notification('Dojotools', self.html_escape(output))
-            message.attach_to_status_icon(self.status_icon)
             message.set_urgency(
                 pynotify.URGENCY_NORMAL if status == 0
                 else pynotify.URGENCY_CRITICAL
