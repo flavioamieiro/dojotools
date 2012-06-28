@@ -104,7 +104,7 @@ class UserInterface(object):
 
 
     def html_escape(self, text):
-        """Produce entities within text."""		 
+        """Produce entities within text."""
         html_escape_table = {
             "&": "&amp;",
             '"': "&quot;",
