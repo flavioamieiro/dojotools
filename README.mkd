@@ -8,6 +8,12 @@ Our *huge* feature list is:
 
  - Keep track of the round time (in the simplest way possible)
 
+This software is still maintained, so feel free to [file any bug reports you
+find][issues], but it will probably not get many new features. There are
+already two forks (that I know of) that implement interesting stuff: there is a
+[gedit plugin][gedit-plugin], by @cesarFrias and [another fork by
+@joaoFelipe][JF] with great features such as code snippet generators for
+various languages and pilot logging.
 
 The only dependency is pygtk (to create the status icon), but if
 you want notifications, you should also have pynotify installed.
@@ -35,3 +41,6 @@ this will probably not work on Windows for now.
 [2]: http://www.ubuntuforums.org/member.php?u=589640
 [python-firmata]: https://github.com/lupeke/python-firmata
 [semaphore]: http://blog.justen.eng.br/2010/10/semaforo-do-coding-dojo-rio.html
+[issues]: https://github.com/flavioamieiro/dojotools/issues
+[gedit-plugin]: https://github.com/cesarFrias/dojotools
+[JF]: https://github.com/JoaoFelipe/dojotools
