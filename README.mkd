@@ -8,8 +8,9 @@ Our *huge* feature list is:
 
  - Keep track of the round time (in the simplest way possible)
 
-This software is still maintained, so feel free to [file any bug reports you
-find][issues], but it will probably not get many new features. There are
+This software is ~~still maintained, so feel free to [file any bug reports you
+find][issues], but it will probably not get many~~ no longer maintained and will 
+not get new features. It might still work, but it's not tested anymore. There are
 already two forks (that I know of) that implement interesting stuff: there is a
 [gedit plugin][gedit-plugin], by @cesarFrias and [another fork by
 @joaoFelipe][JF] with great features such as code snippet generators for
